@@ -6,9 +6,9 @@ import re
 from pathlib import Path
 
 import matplotlib
-
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 import pandas as pd
 
@@ -74,97 +74,93 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
     return rows, unit
 
 
-def plot_location(data: pd.DataFrame, location: str, output: Path) -> None:
+def plot_location(
+    data: pd.DataFrame,
+    location: str,
+    output: Path,
+    fit_degree: int | None = None,
+) -> None:
+    if fit_degree not in (None, 1, 2):
+        raise ValueError("fit_degree must be None, 1 (linear), or 2 (quadratic)")
+
     data = data.sort_values("timestamp").copy()
-    sessions = data["timestamp"].diff().dt.total_seconds().gt(120).cumsum()
-    groups = [part for _, part in data.groupby(sessions)]
     units = data["pressure_unit"].dropna().unique()
-    ylabel = f"AMU 4 partial pressure ({units[0]})" if len(units) == 1 else "AMU 4 signal (pressure unit unavailable)"
+    ylabel = f"Helium pressure ({units[0]})" if len(units) == 1 else "Helium pressure (unit unavailable)"
+    location_label = re.sub(r"^\d+\.", "", location.rsplit("/", 1)[-1]).replace("_", " ")
 
-    fig, axes = plt.subplots(
-        len(groups), 1, figsize=(11, max(4.5, len(groups) * 3.8)), squeeze=False, sharey=True
+    start = data["timestamp"].iloc[0]
+    seconds = (data["timestamp"] - start).dt.total_seconds()
+    segments = seconds.diff().gt(2).cumsum()
+    duration = float(seconds.iloc[-1])
+
+    fig, ax = plt.subplots(figsize=(11, 5.5))
+    for segment_id in segments.unique():
+        mask = segments == segment_id
+        ax.plot(
+            seconds[mask],
+            data.loc[mask, "pressure"],
+            color="#1769aa",
+            linewidth=0.75,
+        )
+
+    if fit_degree is not None:
+        fit = np.polynomial.Polynomial.fit(
+            seconds.to_numpy(dtype=float),
+            data["pressure"].to_numpy(dtype=float),
+            fit_degree,
+        )
+        fit_seconds = np.linspace(0, duration, 500)
+        fit_name = "linear" if fit_degree == 1 else "quadratic"
+        ax.plot(
+            fit_seconds,
+            fit(fit_seconds),
+            color="#e67e22",
+            linewidth=2.2,
+            zorder=4,
+        )
+
+    gaps = seconds.diff()
+    for position in range(1, len(data)):
+        gap_seconds = float(gaps.iloc[position])
+        if gap_seconds <= 2:
+            continue
+        left = float(seconds.iloc[position - 1])
+        right = float(seconds.iloc[position])
+        ax.axvspan(left, right, color="#c62828", alpha=0.14, zorder=0)
+        ax.axvline(left, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
+        ax.axvline(right, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
+
+    peak_position = int(data["pressure"].to_numpy().argmax())
+    peak_time = float(seconds.iloc[peak_position])
+    peak_pressure = float(data["pressure"].iloc[peak_position])
+    ax.scatter(
+        [peak_time],
+        [peak_pressure],
+        color="#c62828",
+        edgecolor="white",
+        linewidth=0.8,
+        s=48,
+        zorder=5,
     )
-    previous_end = None
-    for number, (ax, session) in enumerate(zip(axes[:, 0], groups), start=1):
-        session = session.sort_values("timestamp").copy()
-        start = session["timestamp"].iloc[0]
-        end = session["timestamp"].iloc[-1]
-        seconds = (session["timestamp"] - start).dt.total_seconds()
-        pressure = session.set_index("timestamp")["pressure"]
-        trend = pressure.rolling("15s", center=True, min_periods=1).median()
-        session["trend"] = trend.to_numpy()
-        segments = seconds.diff().gt(2).cumsum()
-        for segment_id in segments.unique():
-            mask = segments == segment_id
-            ax.plot(
-                seconds[mask],
-                session.loc[mask, "pressure"],
-                color="#87919b",
-                linewidth=0.65,
-                alpha=0.45,
-                label="Raw samples" if segment_id == segments.iloc[0] else None,
-            )
-            ax.plot(
-                seconds[mask],
-                session.loc[mask, "trend"],
-                color="#1769aa",
-                linewidth=1.8,
-                label="15-second rolling median" if segment_id == segments.iloc[0] else None,
-            )
-        for position in range(1, len(session)):
-            gap = float(seconds.iloc[position] - seconds.iloc[position - 1])
-            if gap > 10:
-                left = float(seconds.iloc[position - 1])
-                right = float(seconds.iloc[position])
-                ax.axvspan(left, right, color="#d1495b", alpha=0.08)
-                ax.text(
-                    (left + right) / 2,
-                    0.97,
-                    f"No samples for {gap:.0f} sec",
-                    transform=ax.get_xaxis_transform(),
-                    ha="center",
-                    va="top",
-                    fontsize=8,
-                    color="#7f1d2d",
-                )
 
-        duration = float(seconds.iloc[-1])
-        major_tick = 300 if duration > 720 else 60
-        peak_position = int(session["trend"].to_numpy().argmax())
-        peak_time = float(seconds.iloc[peak_position])
-        peak_pressure = float(session["trend"].iloc[peak_position])
-        ax.scatter([peak_time], [peak_pressure], color="#d1495b", s=25, zorder=4)
-        peak_near_right = peak_time > duration * 0.7
-        ax.annotate(
-            f"Highest 15-s median: {peak_pressure:.2g} {units[0] if len(units) == 1 else ''}\n"
-            f"at {int(peak_time // 60)}:{int(peak_time % 60):02d}",
-            xy=(peak_time, peak_pressure),
-            xytext=(-8 if peak_near_right else 8, 8),
-            textcoords="offset points",
-            ha="right" if peak_near_right else "left",
-            fontsize=8,
-            color="#7f1d2d",
-        )
-        title = f"Data segment {number} — starts {start:%Y-%m-%d %H:%M:%S}"
-        if previous_end is not None:
-            missing_seconds = (start - previous_end).total_seconds()
-            title += f" ({missing_seconds / 60:.1f} min with no samples before this)"
-        ax.set_title(title, loc="left", fontsize=10)
-        ax.set_xlim(0, max(duration, 1))
-        ax.xaxis.set_major_locator(MultipleLocator(major_tick))
-        ax.xaxis.set_minor_locator(MultipleLocator(10))
-        ax.xaxis.set_major_formatter(
-            FuncFormatter(lambda value, _: f"{int(value // 60)}:{int(value % 60):02d}")
-        )
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
-        ax.grid(axis="both", which="major", color="#9aa0a6", alpha=0.55, linewidth=0.6)
-        ax.legend(loc="upper right", frameon=False, fontsize=8)
-        previous_end = end
-
-    fig.supylabel(ylabel)
-    axes[-1, 0].set_xlabel("Elapsed time (min:sec; minor ticks every 10 sec)")
-    fig.suptitle(f"AMU 4 helium pressure — {location}", fontsize=13)
-    fig.tight_layout(rect=(0.04, 0.02, 1, 0.97))
+    major_tick = 300 if duration > 720 else 120 if duration > 360 else 60
+    minor_tick = 30 if duration > 720 else 10
+    ax.set_xlim(0, max(duration, 1))
+    ax.xaxis.set_major_locator(MultipleLocator(major_tick))
+    ax.xaxis.set_minor_locator(MultipleLocator(minor_tick))
+    ax.xaxis.set_major_formatter(
+        FuncFormatter(lambda value, _: f"{int(value // 60)}:{int(value % 60):02d}")
+    )
+    ax.set_xlabel("Elapsed time (min:s)")
+    ax.set_ylabel(ylabel)
+    title = f"Helium pressure — {location_label}"
+    if fit_degree is not None:
+        title += f" ({fit_name} fit)"
+    ax.set_title(title, fontsize=14, pad=12)
+    ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
+    ax.grid(axis="both", which="major", color="#9aa0a6", alpha=0.5, linewidth=0.6)
+    ax.grid(axis="x", which="minor", color="#c5c9cc", alpha=0.3, linewidth=0.4)
+    fig.tight_layout()
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=180, bbox_inches="tight")
     plt.close(fig)
@@ -184,6 +180,7 @@ def analyze(root: Path, output: Path) -> dict:
             skipped_files.append(path.relative_to(root).as_posix())
 
     plot_dir = output / "plots" / "helium_by_location"
+    fit_dir = output / "plots" / "helium_by_location_fits"
     csv_dir = output / "processed_data" / "amu4_by_location"
     for location, rows in sorted(folders.items()):
         data = pd.DataFrame(rows).sort_values("timestamp").reset_index(drop=True)
@@ -194,6 +191,8 @@ def analyze(root: Path, output: Path) -> dict:
         csv_dir.mkdir(parents=True, exist_ok=True)
         data.to_csv(csv_dir / f"{filename}.csv", index=False)
         plot_location(data, location, plot_dir / f"{filename}.png")
+        plot_location(data, location, fit_dir / "linear" / f"{filename}.png", fit_degree=1)
+        plot_location(data, location, fit_dir / "quadratic" / f"{filename}.png", fit_degree=2)
 
     return {
         "locations": len(folders),
