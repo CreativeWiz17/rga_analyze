@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<ConfigurationData>
+   <CommunicationParameters
+      Port="COM1"
+      Baud="115200"
+      PacketFrequency="5.0"
+      PacketTimeout="1.0"
+      CommunicationsType="1"
+      UserFrequency="5.0"
+      UserTimeout="1.0"
+      NamedPort=""
+   />
+
+   <ConfigurationParameters
+      Filename="C:\Users\Lab User\Desktop\sn2115_factory_cal.cfg"
+      Description="fc43 + air"
+      TimeStamp="07ea000a00020006000c0039001100d6"
+      DateTime="10/6/2026 12:57:17 PM"
+      Caption="sn2115-100"
+      Serial="2115"
+      Model="100"
+      VacuumPlusVersion="1.0.47"
+   />
+
+   <ScanParameters
+      ScanSpeed="1"
+      LowMass="1"
+      HighMass="50"
+      SamplesPerAMU="20"
+   />
+
+   <OperatingParameters
+      Mode="Trend"
+      Focus1="-20"
+      Focus2="-72"
+      ElectronEnergy="70.0"
+      FilamentEmission="3.0"
+      AutoZero="Off"
+      ScanMode="Sweep"
+      Filament="1"
+      PressureUnits="Torr"
+      EnableElectronMultiplier="0"
+      MultiplierVoltage="2000"
+      FilamentForceOffStartup="1"
+      TargetPressure="4.00e-005"
+      TargetPressureUnits="Torr"
+      MultiplierScale="1.00e+003"
+   />
+
+   <CalibrationParameters
+      LowCalMass="1"
+      LowCalResolution="675"
+      LowCalPosition="0.20"
+      LowCalIonEnergy="4.5"
+      HighCalMass="100"
+      HighCalResolution="866"
+      HighCalPosition="0.47"
+      HighCalIonEnergy="5.0"
+      TotalAmpOffset="2000"
+      PartialAmpOffset="2000"
+      TotalIntegratingCap="9.97"
+      PartialIntegratingCap="3.05"
+      RFSettleTime="50"
+      SWSettleTime="10"
+      Pirani1ATM="2.24660"
+      PiraniZero="0.30978"
+      PiraniAutoRecalibrate="0"
+      PartialSensitivity="6.00e-004"
+      TotalSensitivity="1.00e+001"
+      debug="0"
+      DisablePressureProtection="0.000000"
+      FilamentControlP="-160000.000000"
+      FilamentControlI="10000.000000"
+      FilamentControlD="0.000000"
+      FilamentControlW="63030012000884173000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000"
+      FilamentControlG="0.000000"
+      GroundThreshold="50.000000"
+      GroundThresholdVoltage="0.005000"
+      PiraniThresholdVoltage="0.450000"
+      ExternalIonSupply="0"
+   />
+
+   <LogFileParameters
+      Mode="2"
+      FileName=""
+      DirectoryName="C:\Users\Lab User\RGA Data\October\Mainchamber\Port_On_Chamber"
+      CreationOption="0"
+      NSweeps="1"
+      FileRecordingOn="1"
+   />
+
+   <MassTableParameters
+      Samples="500"
+      AudioOutput="0"
+   > 
+       <Mass1
+            Enabled="1"
+            Sound="1"
+            Mass="4"
+            Description="Helium"
+            Color="Maroon"
+            Dwell="42 ms"
+            HighWarning="1e-010"
+            HighAlarm="1e-009"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass2
+            Enabled="0"
+            Sound="0"
+            Mass="18"
+            Description="Water"
+            Color="Orange"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass3
+            Enabled="0"
+            Sound="0"
+            Mass="28"
+            Description="Nitrogen"
+            Color="Fuschia"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass4
+            Enabled="0"
+            Sound="0"
+            Mass="999"
+            Description="Total Pressure"
+            Color="Blue"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass5
+            Enabled="0"
+            Sound="0"
+            Mass="998"
+            Description=""
+            Color="Black"
+            Dwell="100 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass6
+            Enabled="0"
+            Sound="0"
+            Mass="32"
+            Description="Oxygen"
+            Color="Sky blue"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass7
+            Enabled="0"
+            Sound="0"
+            Mass="40"
+            Description="Argon"
+            Color="Silver"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass8
+            Enabled="0"
+            Sound="0"
+            Mass="43"
+            Description="Hydrocarbons"
+            Color="Pink"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass9
+            Enabled="0"
+            Sound="0"
+            Mass="2"
+            Description="Hydrogen"
+            Color="Black"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass10
+            Enabled="0"
+            Sound="0"
+            Mass="17"
+            Description="H20 Frag"
+            Color="Navy"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+   </MassTableParameters>
+
+   <PrintingParameters
+      InvertColors="0"
+      ShowConfigurationFile="1"
+      ShowDescription="1"
+      ShowTotalPressure="1"
+      ShowPiraniPressure="1"
+      DateFormat=""
+      TimeFormat=""
+   />
+
+   <GraphParametersData>
+      <GraphParameters
+             HScale="1"
+      >
+          <Y-Axis
+               ScaleAbsolute="219"
+               ZeroAbsolute="137"
+               Mode="0"
+          />
+      </GraphParameters>
+      <GraphParameters
+             HScale="1"
+      >
+          <Y-Axis
+               ScaleAbsolute="151"
+               ZeroAbsolute="125"
+               Mode="1"
+          />
+      </GraphParameters>
+   </GraphParametersData>
+
+   <WindowParameters>
+       <Frame
+            flags="2"
+            showCmd="3"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-8"
+            ptMaxPosition.y="-31"
+            rcNormalPosition.left="-430"
+            rcNormalPosition.top="67"
+            rcNormalPosition.right="454"
+            rcNormalPosition.bottom="416"
+       />
+       <Setup
+            flags="0"
+            showCmd="1"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-1"
+            ptMaxPosition.y="-1"
+            rcNormalPosition.left="1430"
+            rcNormalPosition.top="46"
+            rcNormalPosition.right="1916"
+            rcNormalPosition.bottom="922"
+       />
+       <Main
+            flags="2"
+            showCmd="3"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-1"
+            ptMaxPosition.y="-1"
+            rcNormalPosition.left="78"
+            rcNormalPosition.top="78"
+            rcNormalPosition.right="1518"
+            rcNormalPosition.bottom="837"
+       />
+   </WindowParameters>
+
+   <PlotParameters
+      BkColor="Lt Green"
+      LineColor="Blue"
+      ScanColor="Md Blue"
+      MouseWheel="0"
+      LogYAxis="0"
+      PressureLogYAxis="1"
+      PiraniColor="Red"
+      TotalColor="Blue"
+   />
+
+   <Outputs
+      DegasCurrent="3.4379"
+      ElectronicsTemperature="40.8112"
+      PowerSupply="22.6593"
+      FilamentVoltage="1.4151"
+      FilamentResistance="0.4711"
+      SensorTemperature="36.9378"
+      Source1Current="1.6786"
+      Source2Current="1.3216"
+      RFAmpVoltage="0.5067"
+      PiraniCorr="-0.1375"
+      PiraniTemp="-0.1369"
+      PiraniPress="-0.3068"
+      GroundReference="0.0039"
+      DCPlusFB="2.4118"
+      DCMinusFB="2.4134"
+      FilamentDACFine="2047.0000"
+      FilamentDACCoarse="2895.0000"
+      ReferenceVoltage="2.4971"
+      Focus1="-20.0494"
+      Focus2="-67.9456"
+      FilamentPWM="63.7108"
+      FilamentStatus="3"
+      BACurrent="1.0681e-010"
+      DegasTimeLeft="0"
+      PiraniPressureOut="1.0000e-004"
+      TotalPressureOut="7.1204e-009"
+   />
+
+</ConfigurationData>
+2026/10/06 13:26:51.448,    4.000,  6.7728e-011,
+2026/10/06 13:26:51.656,    4.000,  8.0816e-011,
+2026/10/06 13:26:51.865,    4.000,  7.3616e-011,
+2026/10/06 13:26:52.073,    4.000,  8.3816e-011,
+2026/10/06 13:26:52.281,    4.000,  8.0740e-011,
+2026/10/06 13:26:52.490,    4.000,  6.5229e-011,
+2026/10/06 13:26:52.698,    4.000,  8.7815e-011,
+2026/10/06 13:26:52.906,    4.000,  8.5829e-011,
+2026/10/06 13:26:53.114,    4.000,  8.6758e-011,
+2026/10/06 13:26:53.323,    4.000,  8.4322e-011,
+2026/10/06 13:26:53.531,    4.000,  9.1665e-011,
+2026/10/06 13:26:53.740,    4.000,  9.7009e-011,
+2026/10/06 13:26:53.948,    4.000,  8.6527e-011,
+2026/10/06 13:26:54.156,    4.000,  8.5198e-011,
+2026/10/06 13:26:54.365,    4.000,  8.0566e-011,
+2026/10/06 13:26:54.573,    4.000,  7.6924e-011,
+2026/10/06 13:26:54.781,    4.000,  8.1952e-011,
+2026/10/06 13:26:54.990,    4.000,  7.3634e-011,
+2026/10/06 13:26:55.198,    4.000,  8.9836e-011,
+2026/10/06 13:26:55.406,    4.000,  8.0207e-011,
+2026/10/06 13:26:55.615,    4.000,  7.1411e-011,
+2026/10/06 13:26:55.823,    4.000,  7.3261e-011,
+2026/10/06 13:26:56.031,    4.000,  7.5923e-011,
+2026/10/06 13:26:56.240,    4.000,  8.3966e-011,
+2026/10/06 13:26:56.448,    4.000,  7.5442e-011,
+2026/10/06 13:26:56.656,    4.000,  9.2346e-011,
+2026/10/06 13:26:56.864,    4.000,  7.3066e-011,
+2026/10/06 13:26:57.073,    4.000,  8.4980e-011,
+2026/10/06 13:26:57.281,    4.000,  8.7451e-011,
+2026/10/06 13:26:57.489,    4.000,  7.6863e-011,
+2026/10/06 13:26:57.698,    4.000,  7.5744e-011,
+2026/10/06 13:26:57.906,    4.000,  8.9179e-011,
+2026/10/06 13:26:58.114,    4.000,  7.0753e-011,
+2026/10/06 13:26:58.323,    4.000,  8.8432e-011,
+2026/10/06 13:26:58.531,    4.000,  9.0987e-011,
+2026/10/06 13:26:58.739,    4.000,  8.2061e-011,
+2026/10/06 13:26:58.948,    4.000,  7.9017e-011,
+2026/10/06 13:26:59.156,    4.000,  7.7463e-011,
+2026/10/06 13:26:59.364,    4.000,  6.8266e-011,
+2026/10/06 13:26:59.573,    4.000,  7.5985e-011,
+2026/10/06 13:26:59.781,    4.000,  8.4772e-011,
+2026/10/06 13:26:59.989,    4.000,  8.5397e-011,
+2026/10/06 13:27:00.198,    4.000,  8.2786e-011,
+2026/10/06 13:27:00.406,    4.000,  8.7814e-011,
+2026/10/06 13:27:00.615,    4.000,  8.3243e-011,
+2026/10/06 13:27:00.823,    4.000,  7.5998e-011,
+2026/10/06 13:27:01.031,    4.000,  6.6803e-011,
+2026/10/06 13:27:01.240,    4.000,  8.6929e-011,
+2026/10/06 13:27:01.448,    4.000,  6.6105e-011,
+2026/10/06 13:27:01.656,    4.000,  7.9637e-011,
+2026/10/06 13:27:01.865,    4.000,  7.5091e-011,
+2026/10/06 13:27:02.073,    4.000,  6.7095e-011,
+2026/10/06 13:27:02.281,    4.000,  6.6832e-011,
+2026/10/06 13:27:02.490,    4.000,  8.4930e-011,
+2026/10/06 13:27:02.698,    4.000,  9.0979e-011,
+2026/10/06 13:27:02.906,    4.000,  8.5461e-011,
+2026/10/06 13:27:03.115,    4.000,  7.9710e-011,
+2026/10/06 13:27:03.323,    4.000,  8.6329e-011,
+2026/10/06 13:27:03.531,    4.000,  7.9515e-011,
+2026/10/06 13:27:03.740,    4.000,  8.9185e-011,
+2026/10/06 13:27:03.948,    4.000,  8.6432e-011,
+2026/10/06 13:27:04.156,    4.000,  9.3155e-011,
+2026/10/06 13:27:04.365,    4.000,  7.9632e-011,
+2026/10/06 13:27:04.573,    4.000,  8.0497e-011,
+2026/10/06 13:27:04.781,    4.000,  8.6126e-011,
+2026/10/06 13:27:04.990,    4.000,  7.8653e-011,
+2026/10/06 13:27:05.198,    4.000,  8.0296e-011,
+2026/10/06 13:27:05.406,    4.000,  8.4199e-011,
+2026/10/06 13:27:05.615,    4.000,  7.7349e-011,
+2026/10/06 13:27:05.823,    4.000,  8.8086e-011,
+2026/10/06 13:27:06.031,    4.000,  9.6392e-011,
+2026/10/06 13:27:06.240,    4.000,  8.5081e-011,
+2026/10/06 13:27:06.448,    4.000,  7.6072e-011,
+2026/10/06 13:27:06.656,    4.000,  6.6320e-011,
+2026/10/06 13:27:06.865,    4.000,  7.4075e-011,
+2026/10/06 13:27:07.073,    4.000,  7.9282e-011,
+2026/10/06 13:27:07.281,    4.000,  6.8505e-011,
+2026/10/06 13:27:07.490,    4.000,  8.6905e-011,
+2026/10/06 13:27:07.698,    4.000,  8.7035e-011,
+2026/10/06 13:27:07.906,    4.000,  7.3828e-011,
+2026/10/06 13:27:08.115,    4.000,  8.2350e-011,
+2026/10/06 13:27:08.323,    4.000,  8.3367e-011,
+2026/10/06 13:27:08.531,    4.000,  8.4708e-011,
+2026/10/06 13:27:08.740,    4.000,  7.5221e-011,
+2026/10/06 13:27:08.948,    4.000,  1.0548e-010,
+2026/10/06 13:27:09.156,    4.000,  8.0436e-011,
+2026/10/06 13:27:09.365,    4.000,  7.0365e-011,
+2026/10/06 13:27:09.573,    4.000,  7.2256e-011,
+2026/10/06 13:27:09.781,    4.000,  7.3962e-011,
+2026/10/06 13:27:09.990,    4.000,  7.6084e-011,
+2026/10/06 13:27:10.198,    4.000,  9.6673e-011,
+2026/10/06 13:27:10.406,    4.000,  7.7324e-011,
+2026/10/06 13:27:10.615,    4.000,  8.8910e-011,
+2026/10/06 13:27:10.823,    4.000,  7.7832e-011,
+2026/10/06 13:27:11.031,    4.000,  7.5595e-011,
+2026/10/06 13:27:11.239,    4.000,  8.7690e-011,
+2026/10/06 13:27:11.448,    4.000,  8.9747e-011,
+2026/10/06 13:27:11.656,    4.000,  7.5828e-011,
+2026/10/06 13:27:11.864,    4.000,  9.4656e-011,
+2026/10/06 13:27:12.073,    4.000,  8.3117e-011,
+2026/10/06 13:27:12.281,    4.000,  7.2629e-011,

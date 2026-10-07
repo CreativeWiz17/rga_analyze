@@ -1,0 +1,528 @@
+"<?xml version=""1.0"" encoding=""us-ascii""?>",,
+<ConfigurationData>,,
+   <CommunicationParameters,,
+"      Port=""COM1""",,
+"      Baud=""115200""",,
+"      PacketFrequency=""5.0""",,
+"      PacketTimeout=""1.0""",,
+"      CommunicationsType=""1""",,
+"      UserFrequency=""5.0""",,
+"      UserTimeout=""1.0""",,
+"      NamedPort=""""",,
+   />,,
+,,
+   <ConfigurationParameters,,
+"      Filename=""C:\Users\Lab User\Desktop\sn2115_factory_cal.cfg""",,
+"      Description=""fc43 + air""",,
+"      TimeStamp=""07ea000a000200060010003b00090003""",,
+"      DateTime=""10/6/2026 4:59:09 PM""",,
+"      Caption=""sn2115-100""",,
+"      Serial=""2115""",,
+"      Model=""100""",,
+"      VacuumPlusVersion=""1.0.47""",,
+   />,,
+,,
+   <ScanParameters,,
+"      ScanSpeed=""1""",,
+"      LowMass=""1""",,
+"      HighMass=""50""",,
+"      SamplesPerAMU=""20""",,
+   />,,
+,,
+   <OperatingParameters,,
+"      Mode=""Trend""",,
+"      Focus1=""-20""",,
+"      Focus2=""-72""",,
+"      ElectronEnergy=""70.0""",,
+"      FilamentEmission=""3.0""",,
+"      AutoZero=""Off""",,
+"      ScanMode=""Sweep""",,
+"      Filament=""1""",,
+"      PressureUnits=""Torr""",,
+"      EnableElectronMultiplier=""0""",,
+"      MultiplierVoltage=""2000""",,
+"      FilamentForceOffStartup=""1""",,
+"      TargetPressure=""4.00e-005""",,
+"      TargetPressureUnits=""Torr""",,
+"      MultiplierScale=""1.00e+003""",,
+   />,,
+,,
+   <CalibrationParameters,,
+"      LowCalMass=""1""",,
+"      LowCalResolution=""675""",,
+"      LowCalPosition=""0.20""",,
+"      LowCalIonEnergy=""4.5""",,
+"      HighCalMass=""100""",,
+"      HighCalResolution=""866""",,
+"      HighCalPosition=""0.47""",,
+"      HighCalIonEnergy=""5.0""",,
+"      TotalAmpOffset=""2000""",,
+"      PartialAmpOffset=""2000""",,
+"      TotalIntegratingCap=""9.97""",,
+"      PartialIntegratingCap=""3.05""",,
+"      RFSettleTime=""50""",,
+"      SWSettleTime=""10""",,
+"      Pirani1ATM=""2.24660""",,
+"      PiraniZero=""0.30978""",,
+"      PiraniAutoRecalibrate=""0""",,
+"      PartialSensitivity=""6.00e-004""",,
+"      TotalSensitivity=""1.00e+001""",,
+"      debug=""0""",,
+"      DisablePressureProtection=""0.000000""",,
+"      FilamentControlP=""-160000.000000""",,
+"      FilamentControlI=""10000.000000""",,
+"      FilamentControlD=""0.000000""",,
+"      FilamentControlW=""63029998379907705000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000""",,
+"      FilamentControlG=""89979883514738750000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000""",,
+"      GroundThreshold=""50.000000""",,
+"      GroundThresholdVoltage=""0.005000""",,
+"      PiraniThresholdVoltage=""0.450000""",,
+"      ExternalIonSupply=""0""",,
+   />,,
+,,
+   <LogFileParameters,,
+"      Mode=""2""",,
+"      FileName=""""",,
+"      DirectoryName=""C:\Users\Lab User\RGA Data\October\Mainchamber\14.large_stm_baseport""",,
+"      CreationOption=""0""",,
+"      NSweeps=""1""",,
+"      FileRecordingOn=""1""",,
+   />,,
+,,
+   <MassTableParameters,,
+"      Samples=""200""",,
+"      AudioOutput=""0""",,
+   > ,,
+       <Mass1,,
+"            Enabled=""1""",,
+"            Sound=""1""",,
+"            Mass=""4""",,
+"            Description=""Helium""",,
+"            Color=""Maroon""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""1e-010""",,
+"            HighAlarm=""1e-009""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass2,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""18""",,
+"            Description=""Water""",,
+"            Color=""Orange""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass3,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""28""",,
+"            Description=""Nitrogen""",,
+"            Color=""Fuschia""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass4,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""999""",,
+"            Description=""Total Pressure""",,
+"            Color=""Blue""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass5,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""998""",,
+"            Description=""""",,
+"            Color=""Black""",,
+"            Dwell=""100 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass6,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""32""",,
+"            Description=""Oxygen""",,
+"            Color=""Sky blue""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass7,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""40""",,
+"            Description=""Argon""",,
+"            Color=""Silver""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass8,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""43""",,
+"            Description=""Hydrocarbons""",,
+"            Color=""Pink""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass9,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""2""",,
+"            Description=""Hydrogen""",,
+"            Color=""Black""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+       <Mass10,,
+"            Enabled=""0""",,
+"            Sound=""0""",,
+"            Mass=""17""",,
+"            Description=""H20 Frag""",,
+"            Color=""Navy""",,
+"            Dwell=""42 ms""",,
+"            HighWarning=""0""",,
+"            HighAlarm=""0""",,
+"            LowWarning=""0""",,
+"            LowAlarm=""0""",,
+       />,,
+   </MassTableParameters>,,
+,,
+   <PrintingParameters,,
+"      InvertColors=""0""",,
+"      ShowConfigurationFile=""1""",,
+"      ShowDescription=""1""",,
+"      ShowTotalPressure=""1""",,
+"      ShowPiraniPressure=""1""",,
+"      DateFormat=""""",,
+"      TimeFormat=""""",,
+   />,,
+,,
+   <GraphParametersData>,,
+      <GraphParameters,,
+"             HScale=""1""",,
+      >,,
+          <Y-Axis,,
+"               ScaleAbsolute=""133""",,
+"               ZeroAbsolute=""114""",,
+"               Mode=""1""",,
+          />,,
+      </GraphParameters>,,
+      <GraphParameters,,
+"             HScale=""1""",,
+      >,,
+          <Y-Axis,,
+"               ScaleAbsolute=""147""",,
+"               ZeroAbsolute=""137""",,
+"               Mode=""0""",,
+          />,,
+      </GraphParameters>,,
+   </GraphParametersData>,,
+,,
+   <WindowParameters>,,
+       <Frame,,
+"            flags=""2""",,
+"            showCmd=""3""",,
+"            ptMinPosition.x=""-1""",,
+"            ptMinPosition.y=""-1""",,
+"            ptMaxPosition.x=""-8""",,
+"            ptMaxPosition.y=""-31""",,
+"            rcNormalPosition.left=""-430""",,
+"            rcNormalPosition.top=""67""",,
+"            rcNormalPosition.right=""454""",,
+"            rcNormalPosition.bottom=""416""",,
+       />,,
+       <Setup,,
+"            flags=""0""",,
+"            showCmd=""1""",,
+"            ptMinPosition.x=""-1""",,
+"            ptMinPosition.y=""-1""",,
+"            ptMaxPosition.x=""-1""",,
+"            ptMaxPosition.y=""-1""",,
+"            rcNormalPosition.left=""1436""",,
+"            rcNormalPosition.top=""46""",,
+"            rcNormalPosition.right=""1916""",,
+"            rcNormalPosition.bottom=""922""",,
+       />,,
+       <Main,,
+"            flags=""2""",,
+"            showCmd=""3""",,
+"            ptMinPosition.x=""-1""",,
+"            ptMinPosition.y=""-1""",,
+"            ptMaxPosition.x=""-1""",,
+"            ptMaxPosition.y=""-1""",,
+"            rcNormalPosition.left=""156""",,
+"            rcNormalPosition.top=""156""",,
+"            rcNormalPosition.right=""1596""",,
+"            rcNormalPosition.bottom=""915""",,
+       />,,
+   </WindowParameters>,,
+,,
+   <PlotParameters,,
+"      BkColor=""Lt Green""",,
+"      LineColor=""Blue""",,
+"      ScanColor=""Md Blue""",,
+"      MouseWheel=""0""",,
+"      LogYAxis=""0""",,
+"      PressureLogYAxis=""1""",,
+"      PiraniColor=""Red""",,
+"      TotalColor=""Blue""",,
+   />,,
+,,
+   <Outputs,,
+"      DegasCurrent=""3.4390""",,
+"      ElectronicsTemperature=""40.7599""",,
+"      PowerSupply=""22.6699""",,
+"      FilamentVoltage=""1.4172""",,
+"      FilamentResistance=""0.4783""",,
+"      SensorTemperature=""37.4340""",,
+"      Source1Current=""1.6788""",,
+"      Source2Current=""1.3210""",,
+"      RFAmpVoltage=""0.5104""",,
+"      PiraniCorr=""-0.1377""",,
+"      PiraniTemp=""-0.1372""",,
+"      PiraniPress=""-0.3070""",,
+"      GroundReference=""0.0040""",,
+"      DCPlusFB=""2.4116""",,
+"      DCMinusFB=""2.4133""",,
+"      FilamentDACFine=""2047.0000""",,
+"      FilamentDACCoarse=""2895.0000""",,
+"      ReferenceVoltage=""2.4966""",,
+"      Focus1=""-20.0398""",,
+"      Focus2=""-67.9450""",,
+"      FilamentPWM=""63.8242""",,
+"      FilamentStatus=""3""",,
+"      BACurrent=""1.0696e-010""",,
+"      DegasTimeLeft=""0""",,
+"      PiraniPressureOut=""1.0000e-004""",,
+"      TotalPressureOut=""7.1305e-009""",,
+   />,,
+,,
+</ConfigurationData>,,
+09:36.7,4,7.47E-11
+09:36.9,4,7.72E-11
+09:37.1,4,7.84E-11
+09:37.3,4,8.36E-11
+09:37.5,4,7.58E-11
+09:37.7,4,7.55E-11
+09:37.9,4,8.31E-11
+09:38.1,4,7.68E-11
+09:38.3,4,7.50E-11
+09:38.6,4,7.37E-11
+09:38.8,4,6.94E-11
+09:39.0,4,6.81E-11
+09:39.2,4,7.74E-11
+09:39.4,4,7.65E-11
+09:39.6,4,6.96E-11
+09:39.8,4,6.91E-11
+09:40.0,4,7.49E-11
+09:40.2,4,8.42E-11
+09:40.4,4,6.41E-11
+09:40.6,4,8.24E-11
+09:40.8,4,7.84E-11
+09:41.1,4,8.75E-11
+09:41.3,4,6.40E-11
+09:41.5,4,7.52E-11
+09:41.7,4,8.07E-11
+09:41.9,4,7.90E-11
+09:42.1,4,7.77E-11
+09:42.3,4,8.94E-11
+09:42.5,4,7.99E-11
+09:42.7,4,8.83E-11
+09:42.9,4,8.00E-11
+09:43.1,4,8.71E-11
+09:43.3,4,8.75E-11
+09:43.6,4,8.02E-11
+09:43.8,4,7.69E-11
+09:44.0,4,8.10E-11
+09:44.2,4,8.66E-11
+09:44.4,4,8.17E-11
+09:44.6,4,8.79E-11
+09:44.8,4,7.60E-11
+09:45.0,4,7.21E-11
+09:45.2,4,8.10E-11
+09:45.4,4,8.46E-11
+09:45.6,4,8.60E-11
+09:45.8,4,1.01E-10
+09:46.1,4,8.40E-11
+09:46.3,4,9.46E-11
+09:46.5,4,7.47E-11
+09:46.7,4,8.08E-11
+09:46.9,4,7.09E-11
+09:47.1,4,8.52E-11
+09:47.3,4,7.57E-11
+09:47.5,4,8.01E-11
+09:47.7,4,8.78E-11
+09:47.9,4,7.95E-11
+09:48.1,4,8.51E-11
+09:48.3,4,8.33E-11
+09:48.6,4,7.88E-11
+09:48.8,4,8.54E-11
+09:49.0,4,8.07E-11
+09:49.2,4,8.57E-11
+09:49.4,4,8.24E-11
+09:49.6,4,9.07E-11
+09:49.8,4,8.51E-11
+09:50.0,4,7.45E-11
+09:50.2,4,6.67E-11
+09:50.4,4,7.25E-11
+09:50.6,4,8.90E-11
+09:50.8,4,6.46E-11
+09:51.1,4,8.02E-11
+09:51.3,4,8.25E-11
+09:51.5,4,6.49E-11
+09:51.7,4,8.27E-11
+09:51.9,4,6.41E-11
+09:52.1,4,8.12E-11
+09:52.3,4,8.01E-11
+09:52.5,4,8.86E-11
+09:52.7,4,7.78E-11
+09:52.9,4,7.55E-11
+09:53.1,4,6.86E-11
+09:53.3,4,6.96E-11
+09:53.6,4,7.68E-11
+09:53.8,4,8.47E-11
+09:54.0,4,7.95E-11
+09:54.2,4,7.50E-11
+09:54.4,4,8.65E-11
+09:54.6,4,8.15E-11
+09:54.8,4,7.98E-11
+09:55.0,4,7.66E-11
+09:55.2,4,7.24E-11
+09:55.4,4,8.19E-11
+09:55.6,4,8.38E-11
+09:55.8,4,7.23E-11
+09:56.1,4,9.02E-11
+09:56.3,4,7.32E-11
+09:56.5,4,7.79E-11
+09:56.7,4,1.03E-10
+09:56.9,4,8.26E-11
+09:57.1,4,7.60E-11
+09:57.3,4,7.82E-11
+09:57.5,4,7.85E-11
+09:57.7,4,6.92E-11
+09:57.9,4,8.11E-11
+09:58.1,4,8.13E-11
+09:58.3,4,7.85E-11
+09:58.6,4,8.19E-11
+09:58.8,4,8.78E-11
+09:59.0,4,8.80E-11
+09:59.2,4,8.05E-11
+09:59.4,4,7.46E-11
+09:59.6,4,7.88E-11
+09:59.8,4,9.14E-11
+10:00.0,4,8.37E-11
+10:00.2,4,7.26E-11
+10:00.4,4,8.39E-11
+10:00.6,4,6.97E-11
+10:00.8,4,1.01E-10
+10:01.1,4,8.11E-11
+10:01.3,4,8.47E-11
+10:01.5,4,6.94E-11
+10:01.7,4,7.51E-11
+10:01.9,4,9.07E-11
+10:02.1,4,8.49E-11
+10:02.3,4,7.98E-11
+10:02.5,4,9.70E-11
+10:02.7,4,7.35E-11
+10:02.9,4,8.39E-11
+10:03.1,4,7.92E-11
+10:03.3,4,7.54E-11
+10:03.6,4,7.46E-11
+10:03.8,4,7.36E-11
+10:04.0,4,7.88E-11
+10:04.2,4,9.45E-11
+10:04.4,4,8.10E-11
+10:04.6,4,6.68E-11
+10:04.8,4,7.46E-11
+10:05.0,4,7.60E-11
+10:05.2,4,7.86E-11
+10:05.4,4,9.34E-11
+10:05.6,4,8.68E-11
+10:05.8,4,8.32E-11
+10:06.1,4,8.34E-11
+10:06.3,4,7.77E-11
+10:06.5,4,8.78E-11
+10:06.7,4,7.89E-11
+10:06.9,4,8.17E-11
+10:07.1,4,7.59E-11
+10:07.3,4,8.23E-11
+10:07.5,4,8.71E-11
+10:07.7,4,8.24E-11
+10:07.9,4,8.27E-11
+10:08.1,4,9.37E-11
+10:08.3,4,7.09E-11
+10:08.6,4,7.90E-11
+10:08.8,4,8.00E-11
+10:09.0,4,8.44E-11
+10:09.2,4,6.73E-11
+10:09.4,4,8.74E-11
+10:09.6,4,7.70E-11
+10:09.8,4,9.64E-11
+10:10.0,4,7.84E-11
+10:10.2,4,8.33E-11
+10:10.4,4,9.60E-11
+10:10.6,4,7.97E-11
+10:10.8,4,6.59E-11
+10:11.1,4,8.37E-11
+10:11.3,4,8.23E-11
+10:11.5,4,9.31E-11
+10:11.7,4,9.58E-11
+10:11.9,4,7.83E-11
+10:12.1,4,7.90E-11
+10:12.3,4,8.40E-11
+10:12.5,4,8.75E-11
+10:12.7,4,7.16E-11
+10:12.9,4,7.92E-11
+10:13.1,4,1.00E-10
+10:13.3,4,7.62E-11
+10:13.6,4,7.54E-11
+10:13.8,4,8.55E-11
+10:14.0,4,8.23E-11
+10:14.2,4,6.75E-11
+10:14.4,4,8.51E-11
+10:14.6,4,7.69E-11
+10:14.8,4,7.81E-11
+10:15.0,4,8.12E-11
+10:15.2,4,8.71E-11
+10:15.4,4,7.98E-11
+10:15.6,4,8.88E-11
+10:15.8,4,8.08E-11
+10:16.1,4,8.11E-11
+10:16.3,4,9.10E-11
+10:16.5,4,9.49E-11
+10:16.7,4,9.14E-11
+10:16.9,4,8.78E-11
+10:17.1,4,7.88E-11
+10:17.3,4,7.45E-11
+10:17.5,4,7.45E-11
+10:17.7,4,8.17E-11
+10:17.9,4,8.43E-11
+10:18.1,4,7.74E-11
