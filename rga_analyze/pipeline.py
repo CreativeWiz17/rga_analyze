@@ -90,6 +90,7 @@ def plot_location(
 
     start = data["timestamp"].iloc[0]
     seconds = (data["timestamp"] - start).dt.total_seconds()
+    minutes = seconds / 60
     segments = seconds.diff().gt(2).cumsum()
     duration = float(seconds.iloc[-1])
 
@@ -105,18 +106,51 @@ def plot_location(
 
     if fit_degree is not None:
         fit = np.polynomial.Polynomial.fit(
-            seconds.to_numpy(dtype=float),
+            minutes.to_numpy(dtype=float),
             data["pressure"].to_numpy(dtype=float),
             fit_degree,
         )
-        fit_seconds = np.linspace(0, duration, 500)
+        fit_minutes = np.linspace(0, duration / 60, 500)
         fit_name = "linear" if fit_degree == 1 else "quadratic"
         ax.plot(
-            fit_seconds,
-            fit(fit_seconds),
+            fit_minutes * 60,
+            fit(fit_minutes),
             color="#e67e22",
             linewidth=2.2,
             zorder=4,
+        )
+        coefficients = fit.convert().coef
+        equation = f"P(t) = {coefficients[0]:.3e}"
+        for power, coefficient in enumerate(coefficients[1:], start=1):
+            sign = "+" if coefficient >= 0 else "-"
+            term = f" {sign} {abs(coefficient):.3e} t"
+            if power > 1:
+                term += f"^{power}"
+            equation += term
+        pressures = data["pressure"].to_numpy(dtype=float)
+        residual_sum_squares = float(np.sum((pressures - fit(minutes)) ** 2))
+        total_sum_squares = float(np.sum((pressures - pressures.mean()) ** 2))
+        r_squared = (
+            1 - residual_sum_squares / total_sum_squares
+            if total_sum_squares > 0
+            else None
+        )
+        fit_summary = f"{equation}\nR^2 = {r_squared:.3f}" if r_squared is not None else f"{equation}\nR^2 = undefined"
+        ax.text(
+            0.02,
+            0.98,
+            fit_summary,
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontsize=9,
+            bbox={
+                "boxstyle": "round,pad=0.4",
+                "facecolor": "white",
+                "edgecolor": "#9aa0a6",
+                "alpha": 0.9,
+            },
+            zorder=6,
         )
 
     gaps = seconds.diff()
