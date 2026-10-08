@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -24,6 +25,24 @@ ELAPSED_ROW = re.compile(
 )
 PRESSURE_UNIT = re.compile(r'PressureUnits="{1,2}([^"]+)"{1,2}')
 FILE_TIMESTAMP = re.compile(r"(\d{8})-(\d{6})")
+DATE_DATA_FOLDER = re.compile(r"^\d{1,2}\.\d{1,2}(?:_|$)")
+
+
+def _location_and_phase(path: Path, root: Path) -> tuple[str, str]:
+    parts = path.relative_to(root).parts
+    baseline_index = next(
+        (
+            index
+            for index, part in enumerate(parts[:-1])
+            if "baseline" in part.casefold()
+        ),
+        None,
+    )
+    if baseline_index is None:
+        return path.parent.relative_to(root).as_posix(), "spray"
+
+    location = Path(*parts[:baseline_index]).as_posix() or "."
+    return location, "baseline"
 
 
 def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
@@ -31,6 +50,7 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
     text = path.read_text(encoding="utf-8", errors="replace")
     unit_match = PRESSURE_UNIT.search(text)
     unit = unit_match.group(1) if unit_match else None
+    location, phase = _location_and_phase(path, root)
     file_match = FILE_TIMESTAMP.search(path.name)
     file_timestamp = (
         pd.to_datetime("".join(file_match.groups()), format="%Y%m%d%H%M%S")
@@ -49,7 +69,8 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
                     "timestamp": pd.to_datetime(match.group(1), format="mixed"),
                     "pressure": float(match.group(3)),
                     "pressure_unit": unit,
-                    "location": path.parent.relative_to(root).as_posix(),
+                    "location": location,
+                    "phase": phase,
                     "source_file": path.relative_to(root).as_posix(),
                 }
             )
@@ -66,7 +87,8 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
                     "timestamp": timestamp,
                     "pressure": float(elapsed_match.group(3)),
                     "pressure_unit": unit,
-                    "location": path.parent.relative_to(root).as_posix(),
+                    "location": location,
+                    "phase": phase,
                     "source_file": path.relative_to(root).as_posix(),
                 }
             )
@@ -88,29 +110,63 @@ def plot_location(
     ylabel = f"Helium pressure ({units[0]})" if len(units) == 1 else "Helium pressure (unit unavailable)"
     location_label = re.sub(r"^\d+\.", "", location.rsplit("/", 1)[-1]).replace("_", " ")
 
-    start = data["timestamp"].iloc[0]
+    spray_start = (
+        data["spray_start"].dropna().iloc[0]
+        if "spray_start" in data and data["spray_start"].notna().any()
+        else data["timestamp"].iloc[0]
+    )
+    start = pd.Timestamp(spray_start)
     seconds = (data["timestamp"] - start).dt.total_seconds()
-    minutes = seconds / 60
-    segments = seconds.diff().gt(2).cumsum()
-    duration = float(seconds.iloc[-1])
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
-    for segment_id in segments.unique():
-        mask = segments == segment_id
-        ax.plot(
-            seconds[mask],
-            data.loc[mask, "pressure"],
-            color="#1769aa",
-            linewidth=0.75,
-        )
+    phases = data["phase"] if "phase" in data else pd.Series("spray", index=data.index)
+    has_baseline = (phases == "baseline").any()
+    phase_colors = {"baseline": "#73777b", "spray": "#1769aa"}
+    for phase in ("baseline", "spray"):
+        phase_mask = phases == phase
+        if not phase_mask.any():
+            continue
+        phase_seconds = seconds[phase_mask]
+        phase_data = data.loc[phase_mask]
+        phase_gaps = phase_seconds.diff()
+        segment_ids = phase_gaps.gt(2).cumsum()
+        for _, segment_indices in segment_ids.groupby(segment_ids).groups.items():
+            ax.plot(
+                phase_seconds.loc[segment_indices],
+                phase_data.loc[segment_indices, "pressure"],
+                color=phase_colors[phase],
+                linewidth=0.75,
+            )
+
+    for position in range(1, len(data)):
+        gap_seconds = float(seconds.iloc[position] - seconds.iloc[position - 1])
+        if gap_seconds <= 2:
+            continue
+        left = float(seconds.iloc[position - 1])
+        right = float(seconds.iloc[position])
+        ax.axvspan(left, right, color="#c62828", alpha=0.14, zorder=0)
+        ax.axvline(left, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
+        ax.axvline(right, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
 
     if fit_degree is not None:
+        fit_data = (
+            data.loc[data["phase"] == "spray"]
+            if "phase" in data
+            else data
+        )
+        if len(fit_data) < fit_degree + 1:
+            raise ValueError("Not enough spray samples to calculate the requested fit")
+        fit_minutes_data = (fit_data["timestamp"] - start).dt.total_seconds() / 60
         fit = np.polynomial.Polynomial.fit(
-            minutes.to_numpy(dtype=float),
-            data["pressure"].to_numpy(dtype=float),
+            fit_minutes_data.to_numpy(dtype=float),
+            fit_data["pressure"].to_numpy(dtype=float),
             fit_degree,
         )
-        fit_minutes = np.linspace(0, duration / 60, 500)
+        fit_minutes = np.linspace(
+            float(fit_minutes_data.min()),
+            float(fit_minutes_data.max()),
+            500,
+        )
         fit_name = "linear" if fit_degree == 1 else "quadratic"
         ax.plot(
             fit_minutes * 60,
@@ -127,8 +183,8 @@ def plot_location(
             if power > 1:
                 term += f"^{power}"
             equation += term
-        pressures = data["pressure"].to_numpy(dtype=float)
-        residual_sum_squares = float(np.sum((pressures - fit(minutes)) ** 2))
+        pressures = fit_data["pressure"].to_numpy(dtype=float)
+        residual_sum_squares = float(np.sum((pressures - fit(fit_minutes_data)) ** 2))
         total_sum_squares = float(np.sum((pressures - pressures.mean()) ** 2))
         r_squared = (
             1 - residual_sum_squares / total_sum_squares
@@ -153,20 +209,16 @@ def plot_location(
             zorder=6,
         )
 
-    gaps = seconds.diff()
-    for position in range(1, len(data)):
-        gap_seconds = float(gaps.iloc[position])
-        if gap_seconds <= 2:
-            continue
-        left = float(seconds.iloc[position - 1])
-        right = float(seconds.iloc[position])
-        ax.axvspan(left, right, color="#c62828", alpha=0.14, zorder=0)
-        ax.axvline(left, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
-        ax.axvline(right, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
-
-    peak_position = int(data["pressure"].to_numpy().argmax())
-    peak_time = float(seconds.iloc[peak_position])
-    peak_pressure = float(data["pressure"].iloc[peak_position])
+    peak_data = (
+        data.loc[data["phase"] == "spray"]
+        if "phase" in data and (data["phase"] == "spray").any()
+        else data
+    )
+    peak_position = int(peak_data["pressure"].to_numpy().argmax())
+    peak_time = float(
+        (peak_data["timestamp"].iloc[peak_position] - start).total_seconds()
+    )
+    peak_pressure = float(peak_data["pressure"].iloc[peak_position])
     ax.scatter(
         [peak_time],
         [peak_pressure],
@@ -177,17 +229,21 @@ def plot_location(
         zorder=5,
     )
 
+    minimum_time = float(seconds.min())
+    maximum_time = float(seconds.max())
+    duration = maximum_time - minimum_time
     major_tick = 300 if duration > 720 else 120 if duration > 360 else 60
     minor_tick = 30 if duration > 720 else 10
-    ax.set_xlim(0, max(duration, 1))
+    ax.set_xlim(min(minimum_time, 0), max(maximum_time, 1))
     ax.xaxis.set_major_locator(MultipleLocator(major_tick))
     ax.xaxis.set_minor_locator(MultipleLocator(minor_tick))
-    ax.xaxis.set_major_formatter(
-        FuncFormatter(lambda value, _: f"{int(value // 60)}:{int(value % 60):02d}")
-    )
-    ax.set_xlabel("Elapsed time (min:s)")
+    ax.xaxis.set_major_formatter(FuncFormatter(_format_elapsed))
+    if has_baseline:
+        ax.set_xlabel("Time relative to spray start (min:s; baseline is negative)")
+    else:
+        ax.set_xlabel("Elapsed time from first sample (min:s; no baseline data)")
     ax.set_ylabel(ylabel)
-    title = f"Helium pressure — {location_label}"
+    title = f"Helium pressure - {location_label}"
     if fit_degree is not None:
         title += f" ({fit_name} fit)"
     ax.set_title(title, fontsize=14, pad=12)
@@ -200,44 +256,112 @@ def plot_location(
     plt.close(fig)
 
 
+def _format_elapsed(value: float, _: object) -> str:
+    sign = "-" if value < 0 else ""
+    elapsed = int(round(abs(value)))
+    return f"{sign}{elapsed // 60}:{elapsed % 60:02d}"
+
+
 def analyze(root: Path, output: Path) -> dict:
     if not root.is_dir():
         raise FileNotFoundError(f"Data folder not found: {root}")
 
-    folders: dict[str, list[dict]] = {}
+    locations: dict[str, list[dict]] = {}
     skipped_files = []
-    for path in sorted(root.rglob("*.csv")):
+    paths = sorted(root.rglob("*.csv"))
+    baseline_digests: dict[tuple[str, str], set[bytes]] = {}
+    for path in paths:
+        location, phase = _location_and_phase(path, root)
+        if phase == "baseline":
+            key = (location, path.name)
+            digest = hashlib.sha256(path.read_bytes()).digest()
+            baseline_digests.setdefault(key, set()).add(digest)
+
+    duplicate_baseline_copies = 0
+    for path in paths:
+        location, phase = _location_and_phase(path, root)
+        if phase == "spray":
+            key = (location, path.name)
+            digest = hashlib.sha256(path.read_bytes()).digest()
+            if digest in baseline_digests.get(key, set()):
+                duplicate_baseline_copies += 1
+                continue
+
         rows, _ = read_helium_file(path, root)
         if rows:
-            folders.setdefault(rows[0]["location"], []).extend(rows)
+            for row in rows:
+                locations.setdefault(row["location"], []).append(row)
         else:
             skipped_files.append(path.relative_to(root).as_posix())
 
-    plot_dir = output / "plots" / "helium_by_location"
-    fit_dir = output / "plots" / "helium_by_location_fits"
-    csv_dir = output / "processed_data" / "amu4_by_location"
-    for location, rows in sorted(folders.items()):
+    folder_match = DATE_DATA_FOLDER.match(root.name)
+    output_date = folder_match.group().rstrip("_") if folder_match else root.name
+    date_output = output / output_date
+    for location, rows in sorted(locations.items()):
         data = pd.DataFrame(rows).sort_values("timestamp").reset_index(drop=True)
+        spray_rows = data.loc[data["phase"] == "spray"]
+        if spray_rows.empty:
+            spray_start = data["timestamp"].min()
+        else:
+            first_spray_file = min(
+                spray_rows["source_file"].unique(),
+                key=lambda source_file: Path(source_file).name,
+            )
+            spray_start = spray_rows.loc[
+                spray_rows["source_file"] == first_spray_file,
+                "timestamp",
+            ].min()
+        data["spray_start"] = spray_start
         data["elapsed_minutes"] = (
-            data["timestamp"] - data["timestamp"].iloc[0]
+            data["timestamp"] - spray_start
         ).dt.total_seconds() / 60
         filename = re.sub(r"[^A-Za-z0-9._-]+", "_", location)
+        plot_dir = date_output / "plots" / "helium_by_location"
+        fit_dir = date_output / "plots" / "helium_by_location_fits"
+        csv_dir = date_output / "processed_data" / "amu4_by_location"
         csv_dir.mkdir(parents=True, exist_ok=True)
         data.to_csv(csv_dir / f"{filename}.csv", index=False)
         plot_location(data, location, plot_dir / f"{filename}.png")
-        plot_location(data, location, fit_dir / "linear" / f"{filename}.png", fit_degree=1)
-        plot_location(data, location, fit_dir / "quadratic" / f"{filename}.png", fit_degree=2)
+        for degree, name in ((1, "linear"), (2, "quadratic")):
+            if len(spray_rows) >= degree + 1:
+                plot_location(
+                    data,
+                    location,
+                    fit_dir / name / f"{filename}.png",
+                    fit_degree=degree,
+                )
 
     return {
-        "locations": len(folders),
-        "samples": sum(map(len, folders.values())),
+        "output_folder": output_date,
+        "locations": len(locations),
+        "samples": sum(map(len, locations.values())),
+        "duplicate_baseline_copies_excluded": duplicate_baseline_copies,
         "files_without_amu4_time_series": skipped_files,
     }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Plot AMU-4 pressure by RGA location folder.")
-    parser.add_argument("--root", type=Path, default=Path("10.16_data"))
+    parser.add_argument(
+        "--root",
+        type=Path,
+        action="append",
+        help="Data folder to analyze; repeat to include multiple folders. "
+        "Defaults to sibling folders named with a month.day prefix.",
+    )
     parser.add_argument("--output", type=Path, default=Path("analysis_outputs"))
     args = parser.parse_args()
-    print(json.dumps(analyze(args.root, args.output), indent=2))
+    roots = args.root
+    if roots is None:
+        roots = sorted(
+            path
+            for path in Path.cwd().iterdir()
+            if path.is_dir() and DATE_DATA_FOLDER.match(path.name)
+        )
+        if not roots:
+            parser.error(
+                "No data folders found; provide one or more --root paths."
+            )
+    for root in roots:
+        print(f"Input: {root}")
+        print(json.dumps(analyze(root, args.output), indent=2))
