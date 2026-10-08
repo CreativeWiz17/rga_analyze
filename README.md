@@ -4,25 +4,19 @@ Plots AMU-4 pressure by location. Each input folder is analyzed independently an
 
 ## Run
 
-Install dependencies once:
+When you have a new set of data:
 
-```bash
-python -m pip install -r requirements.txt
-```
+1. Put its folder next to the other date folders in this project. Name it with the date at the start, like `10.8_data`.
+2. In VS Code, open **Terminal > New Terminal**.
+3. Copy and run this command:
 
-Then, from this project folder, run:
+   ```powershell
+   .\.venv\Scripts\python.exe -m rga_analyze
+   ```
 
-```bash
-python -m rga_analyze
-```
+4. When it finishes, open `analysis_outputs` to see the results. For `10.8_data`, look in `analysis_outputs/10.8/`.
 
-By default, scans sibling data folders whose names start with a month and day, such as `10.06_data` and `10.7_deep_data`. Each input folder is processed independently and its output is grouped under `analysis_outputs/<month.day>/`.
-
-To process specific folders instead, pass `--root` once per folder. Each one still runs separately:
-
-```bash
-python -m rga_analyze --root path/to/data --root path/to/another_data --output path/to/results
-```
+The terminal needs to be open in the project folder (the one containing `README.md`). The command processes all date-named folders in the project, including older ones.
 
 ## Results
 
