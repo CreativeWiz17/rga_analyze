@@ -26,11 +26,13 @@ The terminal needs to be open in the project folder (the one containing `README.
 - `plots/helium_by_location_fits/quadratic/`: raw readings with a second-degree (quadratic) fit to the spray phase, its equation, and R².
 - `processed_data/amu4_by_location/`: the AMU-4 samples used for each graph, with timestamps, phase, source-file names, spray start, and elapsed time.
 
-The run summary lists any CSV that did not contain usable chronological AMU-4 samples. Those files are left out rather than guessed into the plot.
+The run summary lists any CSV that did not contain usable chronological AMU-4 samples. Those files are left out rather than guessed into the plot. It also reports malformed measurement rows and rows whose timestamps are more than 15 minutes from the timestamp in the source filename; those rows are excluded from analysis without changing the source CSVs.
 
 ## How to read the plots
 
 - Each plot shows raw helium pressure. There is no rolling median or smoothing.
+- If a few pressure values are more than 50 times the 99th-percentile absolute pressure, the graph switches to a symmetric-log y-axis so extreme peaks and ordinary readings remain visible together. This changes only the display scale; it does not remove or alter samples.
+- Time-axis tick spacing adapts to the plotted duration to keep long-run labels readable.
 - CSVs in a nested folder whose name contains `Baseline` are shown as the null baseline. If an identical CSV is also copied directly into the location folder, that duplicate is counted as baseline only; the first remaining CSV marks spray start.
 - Baseline samples are gray and spray samples are blue. Both use their actual sample timestamps; the baseline-colored trace meets the first spray sample at zero, where the blue spray trace begins.
 - The x-axis is time relative to spray start (`min:s`): baseline readings are negative and the first spray sample is at zero. No baseline subtraction is applied to the pressure values.

@@ -17,15 +17,18 @@ import pandas as pd
 DATA_ROW = re.compile(
     r"^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}(?:\.\d+)?)\s*,\s*"
     r"([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*,\s*"
-    r"([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)"
+    r"([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*,?\s*$"
 )
+DATA_ROW_PREFIX = re.compile(r"^\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}")
 ELAPSED_ROW = re.compile(
     r"^(\d+):(\d{2}(?:\.\d+)?)\s*,\s*4\s*,\s*"
-    r"([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)"
+    r"([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*,?\s*$"
 )
 PRESSURE_UNIT = re.compile(r'PressureUnits="{1,2}([^"]+)"{1,2}')
 FILE_TIMESTAMP = re.compile(r"(\d{8})-(\d{6})")
 DATE_DATA_FOLDER = re.compile(r"^\d{1,2}\.\d{1,2}(?:_|$)")
+FILE_TIMESTAMP_TOLERANCE = pd.Timedelta(minutes=15)
+SYMMETRIC_LOG_DYNAMIC_RANGE = 50
 
 
 def _location_and_phase(path: Path, root: Path) -> tuple[str, str]:
@@ -47,6 +50,13 @@ def _location_and_phase(path: Path, root: Path) -> tuple[str, str]:
 
 def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
     """Read AMU-4 rows and the pressure unit from one RGA export."""
+    rows, unit, _, _ = _read_helium_file(path, root)
+    return rows, unit
+
+
+def _read_helium_file(
+    path: Path, root: Path
+) -> tuple[list[dict], str | None, int, int]:
     text = path.read_text(encoding="utf-8", errors="replace")
     unit_match = PRESSURE_UNIT.search(text)
     unit = unit_match.group(1) if unit_match else None
@@ -58,22 +68,34 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
         else None
     )
     rows = []
+    malformed_rows = 0
+    timestamp_mismatches = 0
 
     for line in text.splitlines():
         line = line.strip()
-        match = DATA_ROW.match(line)
-        elapsed_match = ELAPSED_ROW.match(line)
-        if match and float(match.group(2)) == 4:
-            rows.append(
-                {
-                    "timestamp": pd.to_datetime(match.group(1), format="mixed"),
-                    "pressure": float(match.group(3)),
-                    "pressure_unit": unit,
-                    "location": location,
-                    "phase": phase,
-                    "source_file": path.relative_to(root).as_posix(),
-                }
-            )
+        match = DATA_ROW.fullmatch(line)
+        elapsed_match = ELAPSED_ROW.fullmatch(line)
+        if match:
+            if float(match.group(2)) == 4:
+                timestamp = pd.to_datetime(match.group(1), format="mixed")
+                if (
+                    file_timestamp is not None
+                    and abs(timestamp - file_timestamp) > FILE_TIMESTAMP_TOLERANCE
+                ):
+                    timestamp_mismatches += 1
+                    continue
+                rows.append(
+                    {
+                        "timestamp": timestamp,
+                        "pressure": float(match.group(3)),
+                        "pressure_unit": unit,
+                        "location": location,
+                        "phase": phase,
+                        "source_file": path.relative_to(root).as_posix(),
+                    }
+                )
+        elif DATA_ROW_PREFIX.match(line):
+            malformed_rows += 1
         elif elapsed_match:
             if file_timestamp is None:
                 raise ValueError(f"Clock-time data has no timestamp in its filename: {path}")
@@ -93,7 +115,7 @@ def read_helium_file(path: Path, root: Path) -> tuple[list[dict], str | None]:
                 }
             )
 
-    return rows, unit
+    return rows, unit, malformed_rows, timestamp_mismatches
 
 
 def plot_location(
@@ -232,8 +254,28 @@ def plot_location(
     minimum_time = float(seconds.min())
     maximum_time = float(seconds.max())
     duration = maximum_time - minimum_time
-    major_tick = 300 if duration > 720 else 120 if duration > 360 else 60
-    minor_tick = 30 if duration > 720 else 10
+    major_tick = next(
+        (
+            tick
+            for tick in (
+                60,
+                120,
+                300,
+                600,
+                900,
+                1800,
+                3600,
+                7200,
+                10800,
+                21600,
+                43200,
+                86400,
+            )
+            if duration / tick <= 8
+        ),
+        86400,
+    )
+    minor_tick = max(30, major_tick // 5)
     ax.set_xlim(min(minimum_time, 0), max(maximum_time, 1))
     ax.xaxis.set_major_locator(MultipleLocator(major_tick))
     ax.xaxis.set_minor_locator(MultipleLocator(minor_tick))
@@ -242,12 +284,19 @@ def plot_location(
         ax.set_xlabel("Time relative to spray start (min:s; baseline is negative)")
     else:
         ax.set_xlabel("Elapsed time from first sample (min:s; no baseline data)")
+    symlog_linthresh = _pressure_symlog_linthresh(
+        data["pressure"].to_numpy(dtype=float)
+    )
+    if symlog_linthresh is not None:
+        ax.set_yscale("symlog", linthresh=symlog_linthresh)
+        ylabel += "; symlog scale"
     ax.set_ylabel(ylabel)
     title = f"Helium pressure - {location_label}"
     if fit_degree is not None:
         title += f" ({fit_name} fit)"
     ax.set_title(title, fontsize=14, pad=12)
-    ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
+    if symlog_linthresh is None:
+        ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
     ax.grid(axis="both", which="major", color="#9aa0a6", alpha=0.5, linewidth=0.6)
     ax.grid(axis="x", which="minor", color="#c5c9cc", alpha=0.3, linewidth=0.4)
     fig.tight_layout()
@@ -262,12 +311,28 @@ def _format_elapsed(value: float, _: object) -> str:
     return f"{sign}{elapsed // 60}:{elapsed % 60:02d}"
 
 
+def _pressure_symlog_linthresh(pressures: np.ndarray) -> float | None:
+    magnitudes = np.abs(pressures[np.isfinite(pressures)])
+    magnitudes = magnitudes[magnitudes > 0]
+    if magnitudes.size < 3:
+        return None
+
+    typical_high = float(np.quantile(magnitudes, 0.99))
+    if typical_high <= 0 or float(magnitudes.max()) <= (
+        typical_high * SYMMETRIC_LOG_DYNAMIC_RANGE
+    ):
+        return None
+    return float(np.median(magnitudes))
+
+
 def analyze(root: Path, output: Path) -> dict:
     if not root.is_dir():
         raise FileNotFoundError(f"Data folder not found: {root}")
 
     locations: dict[str, list[dict]] = {}
     skipped_files = []
+    malformed_rows_excluded = 0
+    timestamp_mismatches_excluded = 0
     paths = sorted(root.rglob("*.csv"))
     baseline_digests: dict[tuple[str, str], set[bytes]] = {}
     for path in paths:
@@ -287,7 +352,9 @@ def analyze(root: Path, output: Path) -> dict:
                 duplicate_baseline_copies += 1
                 continue
 
-        rows, _ = read_helium_file(path, root)
+        rows, _, malformed_rows, timestamp_mismatches = _read_helium_file(path, root)
+        malformed_rows_excluded += malformed_rows
+        timestamp_mismatches_excluded += timestamp_mismatches
         if rows:
             for row in rows:
                 locations.setdefault(row["location"], []).append(row)
@@ -336,6 +403,8 @@ def analyze(root: Path, output: Path) -> dict:
         "locations": len(locations),
         "samples": sum(map(len, locations.values())),
         "duplicate_baseline_copies_excluded": duplicate_baseline_copies,
+        "malformed_rows_excluded": malformed_rows_excluded,
+        "rows_outside_file_time_window_excluded": timestamp_mismatches_excluded,
         "files_without_amu4_time_series": skipped_files,
     }
 

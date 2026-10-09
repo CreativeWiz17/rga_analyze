@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<ConfigurationData>
+   <CommunicationParameters
+      Port="COM1"
+      Baud="115200"
+      PacketFrequency="5.0"
+      PacketTimeout="1.0"
+      CommunicationsType="1"
+      UserFrequency="5.0"
+      UserTimeout="1.0"
+      NamedPort=""
+   />
+
+   <ConfigurationParameters
+      Filename="C:\Users\Lab User\Desktop\sn2115_factory_cal.cfg"
+      Description="fc43 + air"
+      TimeStamp="07ea000a00040008000e0035001b00dd"
+      DateTime="10/8/2026 2:53:27 PM"
+      Caption="sn2115-100"
+      Serial="2115"
+      Model="100"
+      VacuumPlusVersion="1.0.47"
+   />
+
+   <ScanParameters
+      ScanSpeed="1"
+      LowMass="1"
+      HighMass="50"
+      SamplesPerAMU="20"
+   />
+
+   <OperatingParameters
+      Mode="Trend"
+      Focus1="-20"
+      Focus2="-72"
+      ElectronEnergy="70.0"
+      FilamentEmission="3.0"
+      AutoZero="Off"
+      ScanMode="Sweep"
+      Filament="1"
+      PressureUnits="Torr"
+      EnableElectronMultiplier="0"
+      MultiplierVoltage="2000"
+      FilamentForceOffStartup="1"
+      TargetPressure="4.00e-005"
+      TargetPressureUnits="Torr"
+      MultiplierScale="1.00e+003"
+   />
+
+   <CalibrationParameters
+      LowCalMass="1"
+      LowCalResolution="675"
+      LowCalPosition="0.20"
+      LowCalIonEnergy="4.5"
+      HighCalMass="100"
+      HighCalResolution="866"
+      HighCalPosition="0.47"
+      HighCalIonEnergy="5.0"
+      TotalAmpOffset="2000"
+      PartialAmpOffset="2000"
+      TotalIntegratingCap="9.97"
+      PartialIntegratingCap="3.05"
+      RFSettleTime="50"
+      SWSettleTime="10"
+      Pirani1ATM="2.24660"
+      PiraniZero="0.30978"
+      PiraniAutoRecalibrate="0"
+      PartialSensitivity="6.00e-004"
+      TotalSensitivity="1.00e+001"
+      debug="0"
+      DisablePressureProtection="0.000000"
+      FilamentControlP="-160000.000000"
+      FilamentControlI="10000.000000"
+      FilamentControlD="0.000000"
+      FilamentControlW="29530064139312950000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.000000"
+      FilamentControlG="0.000000"
+      GroundThreshold="50.000000"
+      GroundThresholdVoltage="0.005000"
+      PiraniThresholdVoltage="0.450000"
+      ExternalIonSupply="0"
+   />
+
+   <LogFileParameters
+      Mode="2"
+      FileName=""
+      DirectoryName="C:\Users\Lab User\RGA Data\October\Mainchamber\261007 Measured accurately\08-2.small_top_stm_window"
+      CreationOption="0"
+      NSweeps="1"
+      FileRecordingOn="1"
+   />
+
+   <MassTableParameters
+      Samples="500"
+      AudioOutput="0"
+   > 
+       <Mass1
+            Enabled="1"
+            Sound="1"
+            Mass="4"
+            Description="Helium"
+            Color="Maroon"
+            Dwell="42 ms"
+            HighWarning="1e-010"
+            HighAlarm="1e-009"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass2
+            Enabled="0"
+            Sound="0"
+            Mass="18"
+            Description="Water"
+            Color="Orange"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass3
+            Enabled="0"
+            Sound="0"
+            Mass="28"
+            Description="Nitrogen"
+            Color="Fuschia"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass4
+            Enabled="0"
+            Sound="0"
+            Mass="999"
+            Description="Total Pressure"
+            Color="Blue"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass5
+            Enabled="0"
+            Sound="0"
+            Mass="998"
+            Description=""
+            Color="Black"
+            Dwell="100 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass6
+            Enabled="0"
+            Sound="0"
+            Mass="32"
+            Description="Oxygen"
+            Color="Sky blue"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass7
+            Enabled="0"
+            Sound="0"
+            Mass="40"
+            Description="Argon"
+            Color="Silver"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass8
+            Enabled="0"
+            Sound="0"
+            Mass="43"
+            Description="Hydrocarbons"
+            Color="Pink"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass9
+            Enabled="0"
+            Sound="0"
+            Mass="2"
+            Description="Hydrogen"
+            Color="Black"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+       <Mass10
+            Enabled="0"
+            Sound="0"
+            Mass="17"
+            Description="H20 Frag"
+            Color="Navy"
+            Dwell="42 ms"
+            HighWarning="0"
+            HighAlarm="0"
+            LowWarning="0"
+            LowAlarm="0"
+       />
+   </MassTableParameters>
+
+   <PrintingParameters
+      InvertColors="0"
+      ShowConfigurationFile="1"
+      ShowDescription="1"
+      ShowTotalPressure="1"
+      ShowPiraniPressure="1"
+      DateFormat=""
+      TimeFormat=""
+   />
+
+   <GraphParametersData>
+      <GraphParameters
+             HScale="1"
+      >
+          <Y-Axis
+               ScaleAbsolute="99"
+               ZeroAbsolute="127"
+               Mode="1"
+          />
+      </GraphParameters>
+      <GraphParameters
+             HScale="1"
+      >
+          <Y-Axis
+               ScaleAbsolute="147"
+               ZeroAbsolute="137"
+               Mode="0"
+          />
+      </GraphParameters>
+   </GraphParametersData>
+
+   <WindowParameters>
+       <Frame
+            flags="2"
+            showCmd="3"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-8"
+            ptMaxPosition.y="-31"
+            rcNormalPosition.left="-430"
+            rcNormalPosition.top="67"
+            rcNormalPosition.right="454"
+            rcNormalPosition.bottom="416"
+       />
+       <Setup
+            flags="0"
+            showCmd="1"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-1"
+            ptMaxPosition.y="-1"
+            rcNormalPosition.left="1436"
+            rcNormalPosition.top="46"
+            rcNormalPosition.right="1916"
+            rcNormalPosition.bottom="922"
+       />
+       <Main
+            flags="2"
+            showCmd="3"
+            ptMinPosition.x="-1"
+            ptMinPosition.y="-1"
+            ptMaxPosition.x="-1"
+            ptMaxPosition.y="-1"
+            rcNormalPosition.left="234"
+            rcNormalPosition.top="234"
+            rcNormalPosition.right="1674"
+            rcNormalPosition.bottom="993"
+       />
+   </WindowParameters>
+
+   <PlotParameters
+      BkColor="Lt Green"
+      LineColor="Blue"
+      ScanColor="Md Blue"
+      MouseWheel="0"
+      LogYAxis="0"
+      PressureLogYAxis="1"
+      PiraniColor="Red"
+      TotalColor="Blue"
+   />
+
+   <Outputs
+      DegasCurrent="3.4337"
+      ElectronicsTemperature="38.9720"
+      PowerSupply="22.7612"
+      FilamentVoltage="1.4147"
+      FilamentResistance="0.4676"
+      SensorTemperature="35.0333"
+      Source1Current="1.6756"
+      Source2Current="1.3247"
+      RFAmpVoltage="0.4973"ŽÕÞÄ´‹Ì9Š1qð]{/g,#kxA›ªVx†eäç­p¿oÞé¬Xä©Ó±i›˜v‘9Ç2š˜ä©ÚéŽáö æ
+¾IøiÂ2.´)µÂkXFÄ©­pR÷@ž^)híË×51©Èœ£U£|ÿD‚×€bd¢=žçÝ-[ª–w†b´VóXJ#ÝAèôJAk/>DC©×&2çTFÓÐ?DdUTF¼W#ú#1)í¡Ò9.£2òk‹z{@‘TFÄÔø§¿"î¨EÊ$·¡9¿ÕÄ4ðOÕDóNHé=§èfbªZÞ•ñ†Ã¯¦M’ÊH0Åø§‚‚Ö^Ú´Í9•1‘,¶Îª¨ŒxÈÒí5&c¾e$F~AÑÚ–$F‹35æ©Ð '-ší*âüVÍ€?fä@eÄ›nþšï_²MTÆ…˜Rk»FeDœÚÚ~øSÑõÈQ‹&¦]<Îo51øSaFTFÌÈ©Ñ|¢MŒ½´eTF~þaEo×#IeD›ü©Ò¦°¶uEœ“ÍãÜJÅ½£tÿÎÉrÙD~ÑßBƒRÛ‡{Ñh›³·!O•……½¯ˆs(£‰éL?UžÉÏÈÆOÂþô?ñbJ-lîÅ¤-l‚A8¡J‡.bñlcp~«‰iÌg¿z&'>£¹{÷ÇÚ‰Ï¸SšlâÀÃ½˜t²	­Vª´),ì}Eœó…>§¨‰0#>£µ´R³IWÍìn„CÙ1 ÆgdÝÒ6uìoöj¥MGê¶iÓ.ç¨F^ßI$ÌÈÕH™Baw«ZÛª‘Ÿ_´¶%ª‘&«U„*¿Hâó6ç·š˜(ª0#T#y, 0÷ç5{¨¶»¥~ngî'ösÓÖÓ ¨JLáç¦"NdR:žÑ¼ÎÓ5ÑF×ú9¤,OxÆ|=ÊðŒä›-l¿o>ñS’dß"îæøEÓ ]œßjb˜¨ÂŒPh™åûÝmB5.Ä”fv;ûp«AÕhéJ‰ªÄtdv›˜vq7G5š˜&ª0#T£%ŒUò•&TãBL©µíìÃ½˜´µMÜÕ,d%¦#mÄÄ´«‚sT#b¢ÏË©:GLºÕHÆo)gB5.Ä”ú¶k¨F&§ôm³µh÷5:é$F2O·a7¿Õ¤t¦£*‹r8ÒÂ³P+8RJo'"î•IÞ×*%Ne41íÂn~«‰iÀ£ŠÍm 8¾iÌ9øH’xÒs\ˆ)5¼Ž¸“4¼ÿ~<ªP¦ðlë8ç7"º­}‘¿‘	^HäšøÉ¤¶¶³÷’‘¶6É
+ö§àiÎg4ÚEÚüV4Ñ¥9 ?øÉÏÀOâd³‡JÖQ†rd•9lè½˜¤­ýgoü4‘=é€FÓ.Òæ·š˜PªšgçœŠ»Æd‰äH2±Ú”æ”8q/&™SBB‘AS=Í¤YlkàüV–wš€­}‘ËwIáH2±bJmíËÑ
+›kw2(©Ç
