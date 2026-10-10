@@ -28,7 +28,10 @@ PRESSURE_UNIT = re.compile(r'PressureUnits="{1,2}([^"]+)"{1,2}')
 FILE_TIMESTAMP = re.compile(r"(\d{8})-(\d{6})")
 DATE_DATA_FOLDER = re.compile(r"^\d{1,2}\.\d{1,2}(?:_|$)")
 FILE_TIMESTAMP_TOLERANCE = pd.Timedelta(minutes=15)
-SYMMETRIC_LOG_DYNAMIC_RANGE = 50
+ISOLATED_SPIKE_FACTOR = 10
+ISOLATED_SPIKE_NEIGHBOR_RATIO = 10
+MAX_ISOLATED_SPIKE_RUN_LENGTH = 2
+MAX_CONNECTED_SAMPLE_GAP_SECONDS = 2
 
 
 def _location_and_phase(path: Path, root: Path) -> tuple[str, str]:
@@ -128,6 +131,8 @@ def plot_location(
         raise ValueError("fit_degree must be None, 1 (linear), or 2 (quadratic)")
 
     data = data.sort_values("timestamp").copy()
+    spike_mask = _isolated_pressure_spike_mask(data)
+    data.loc[spike_mask, "pressure"] = np.nan
     units = data["pressure_unit"].dropna().unique()
     ylabel = f"Helium pressure ({units[0]})" if len(units) == 1 else "Helium pressure (unit unavailable)"
     location_label = re.sub(r"^\d+\.", "", location.rsplit("/", 1)[-1]).replace("_", " ")
@@ -151,7 +156,7 @@ def plot_location(
         phase_seconds = seconds[phase_mask]
         phase_data = data.loc[phase_mask]
         phase_gaps = phase_seconds.diff()
-        segment_ids = phase_gaps.gt(2).cumsum()
+        segment_ids = phase_gaps.gt(MAX_CONNECTED_SAMPLE_GAP_SECONDS).cumsum()
         for _, segment_indices in segment_ids.groupby(segment_ids).groups.items():
             ax.plot(
                 phase_seconds.loc[segment_indices],
@@ -162,7 +167,7 @@ def plot_location(
 
     for position in range(1, len(data)):
         gap_seconds = float(seconds.iloc[position] - seconds.iloc[position - 1])
-        if gap_seconds <= 2:
+        if gap_seconds <= MAX_CONNECTED_SAMPLE_GAP_SECONDS:
             continue
         left = float(seconds.iloc[position - 1])
         right = float(seconds.iloc[position])
@@ -172,9 +177,9 @@ def plot_location(
 
     if fit_degree is not None:
         fit_data = (
-            data.loc[data["phase"] == "spray"]
+            data.loc[(data["phase"] == "spray") & data["pressure"].notna()]
             if "phase" in data
-            else data
+            else data.loc[data["pressure"].notna()]
         )
         if len(fit_data) < fit_degree + 1:
             raise ValueError("Not enough spray samples to calculate the requested fit")
@@ -232,24 +237,25 @@ def plot_location(
         )
 
     peak_data = (
-        data.loc[data["phase"] == "spray"]
+        data.loc[(data["phase"] == "spray") & data["pressure"].notna()]
         if "phase" in data and (data["phase"] == "spray").any()
-        else data
+        else data.loc[data["pressure"].notna()]
     )
-    peak_position = int(peak_data["pressure"].to_numpy().argmax())
-    peak_time = float(
-        (peak_data["timestamp"].iloc[peak_position] - start).total_seconds()
-    )
-    peak_pressure = float(peak_data["pressure"].iloc[peak_position])
-    ax.scatter(
-        [peak_time],
-        [peak_pressure],
-        color="#c62828",
-        edgecolor="white",
-        linewidth=0.8,
-        s=48,
-        zorder=5,
-    )
+    if not peak_data.empty:
+        peak_position = int(peak_data["pressure"].to_numpy().argmax())
+        peak_time = float(
+            (peak_data["timestamp"].iloc[peak_position] - start).total_seconds()
+        )
+        peak_pressure = float(peak_data["pressure"].iloc[peak_position])
+        ax.scatter(
+            [peak_time],
+            [peak_pressure],
+            color="#c62828",
+            edgecolor="white",
+            linewidth=0.8,
+            s=48,
+            zorder=5,
+        )
 
     minimum_time = float(seconds.min())
     maximum_time = float(seconds.max())
@@ -284,19 +290,14 @@ def plot_location(
         ax.set_xlabel("Time relative to spray start (min:s; baseline is negative)")
     else:
         ax.set_xlabel("Elapsed time from first sample (min:s; no baseline data)")
-    symlog_linthresh = _pressure_symlog_linthresh(
-        data["pressure"].to_numpy(dtype=float)
-    )
-    if symlog_linthresh is not None:
-        ax.set_yscale("symlog", linthresh=symlog_linthresh)
-        ylabel += "; symlog scale"
     ax.set_ylabel(ylabel)
     title = f"Helium pressure - {location_label}"
     if fit_degree is not None:
         title += f" ({fit_name} fit)"
+    if spike_mask.any():
+        title += f" ({int(spike_mask.sum())} isolated spike sample(s) omitted)"
     ax.set_title(title, fontsize=14, pad=12)
-    if symlog_linthresh is None:
-        ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
+    ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2), useMathText=True)
     ax.grid(axis="both", which="major", color="#9aa0a6", alpha=0.5, linewidth=0.6)
     ax.grid(axis="x", which="minor", color="#c5c9cc", alpha=0.3, linewidth=0.4)
     fig.tight_layout()
@@ -311,18 +312,51 @@ def _format_elapsed(value: float, _: object) -> str:
     return f"{sign}{elapsed // 60}:{elapsed % 60:02d}"
 
 
-def _pressure_symlog_linthresh(pressures: np.ndarray) -> float | None:
-    magnitudes = np.abs(pressures[np.isfinite(pressures)])
-    magnitudes = magnitudes[magnitudes > 0]
-    if magnitudes.size < 3:
-        return None
+def _isolated_pressure_spike_mask(data: pd.DataFrame) -> np.ndarray:
+    pressures = data["pressure"].to_numpy(dtype=float)
+    timestamps = data["timestamp"]
+    phases = (
+        data["phase"].to_numpy()
+        if "phase" in data
+        else np.full(len(data), "spray")
+    )
+    spike_mask = np.zeros(len(data), dtype=bool)
 
-    typical_high = float(np.quantile(magnitudes, 0.99))
-    if typical_high <= 0 or float(magnitudes.max()) <= (
-        typical_high * SYMMETRIC_LOG_DYNAMIC_RANGE
-    ):
-        return None
-    return float(np.median(magnitudes))
+    for run_length in range(MAX_ISOLATED_SPIKE_RUN_LENGTH, 0, -1):
+        for start in range(1, len(data) - run_length):
+            end = start + run_length - 1
+            if spike_mask[start : end + 1].any():
+                continue
+            if not np.all(phases[start - 1 : end + 2] == phases[start]):
+                continue
+
+            neighborhood_indices = (start - 1, end + 1)
+            neighborhood = np.abs(pressures[list(neighborhood_indices)])
+            spike_run = np.abs(pressures[start : end + 1])
+            if not np.isfinite(np.concatenate((neighborhood, spike_run))).all():
+                continue
+
+            gaps = [
+                (
+                    timestamps.iloc[index + 1] - timestamps.iloc[index]
+                ).total_seconds()
+                for index in range(start - 1, end + 1)
+            ]
+            if any(gap > MAX_CONNECTED_SAMPLE_GAP_SECONDS for gap in gaps):
+                continue
+
+            neighbor_low = float(neighborhood.min())
+            neighbor_high = float(neighborhood.max())
+            neighbors_are_similar = (
+                neighbor_low == 0 and neighbor_high == 0
+            ) or neighbor_high <= ISOLATED_SPIKE_NEIGHBOR_RATIO * neighbor_low
+            if (
+                neighbors_are_similar
+                and np.all(spike_run > ISOLATED_SPIKE_FACTOR * neighbor_high)
+            ):
+                spike_mask[start : end + 1] = True
+
+    return spike_mask
 
 
 def analyze(root: Path, output: Path) -> dict:
@@ -382,6 +416,10 @@ def analyze(root: Path, output: Path) -> dict:
         data["elapsed_minutes"] = (
             data["timestamp"] - spray_start
         ).dt.total_seconds() / 60
+        isolated_spikes = _isolated_pressure_spike_mask(data)
+        usable_spray_samples = int(
+            ((data["phase"] == "spray") & ~isolated_spikes).sum()
+        )
         filename = re.sub(r"[^A-Za-z0-9._-]+", "_", location)
         plot_dir = date_output / "plots" / "helium_by_location"
         fit_dir = date_output / "plots" / "helium_by_location_fits"
@@ -390,7 +428,7 @@ def analyze(root: Path, output: Path) -> dict:
         data.to_csv(csv_dir / f"{filename}.csv", index=False)
         plot_location(data, location, plot_dir / f"{filename}.png")
         for degree, name in ((1, "linear"), (2, "quadratic")):
-            if len(spray_rows) >= degree + 1:
+            if usable_spray_samples >= degree + 1:
                 plot_location(
                     data,
                     location,

@@ -3,9 +3,10 @@ import unittest
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from rga_analyze.pipeline import (
-    _pressure_symlog_linthresh,
+    _isolated_pressure_spike_mask,
     _read_helium_file,
     read_helium_file,
 )
@@ -46,16 +47,65 @@ class ReadHeliumFileTests(unittest.TestCase):
         self.assertEqual(timestamp_mismatches, 1)
 
 
-class PressureScaleTests(unittest.TestCase):
-    def test_uses_symlog_for_isolated_large_pressure_peak(self) -> None:
-        pressures = np.concatenate((np.full(1000, 1e-11), [4e-9]))
+class IsolatedPressureSpikeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.timestamps = pd.date_range("2026-10-08", periods=5, freq="s")
 
-        self.assertEqual(_pressure_symlog_linthresh(pressures), 1e-11)
+    def test_detects_single_sample_spike_between_similar_readings(self) -> None:
+        data = pd.DataFrame(
+            {
+                "timestamp": self.timestamps,
+                "pressure": [1e-11, 1.1e-11, 4e-9, 0.9e-11, 1e-11],
+                "phase": ["baseline"] * 5,
+            }
+        )
 
-    def test_keeps_linear_scale_for_narrow_pressure_range(self) -> None:
-        pressures = np.array([-2e-11, -1e-11, 1e-11, 2e-11])
+        np.testing.assert_array_equal(
+            _isolated_pressure_spike_mask(data),
+            [False, False, True, False, False],
+        )
 
-        self.assertIsNone(_pressure_symlog_linthresh(pressures))
+    def test_detects_two_sample_spike_run_bounded_by_ordinary_readings(self) -> None:
+        data = pd.DataFrame(
+            {
+                "timestamp": self.timestamps,
+                "pressure": [1e-11, 1.04e-11, 2.19e-9, 4.16e-9, 1.88e-12],
+                "phase": ["baseline"] * 5,
+            }
+        )
+
+        np.testing.assert_array_equal(
+            _isolated_pressure_spike_mask(data),
+            [False, False, True, True, False],
+        )
+
+    def test_keeps_sustained_high_readings(self) -> None:
+        data = pd.DataFrame(
+            {
+                "timestamp": self.timestamps,
+                "pressure": [1e-11, 4e-9, 4e-9, 4e-9, 1e-11],
+                "phase": ["spray"] * 5,
+            }
+        )
+
+        self.assertFalse(_isolated_pressure_spike_mask(data).any())
+
+    def test_does_not_detect_across_phase_changes_or_time_gaps(self) -> None:
+        data = pd.DataFrame(
+            {
+                "timestamp": [
+                    self.timestamps[0],
+                    self.timestamps[1],
+                    self.timestamps[2] + pd.Timedelta(seconds=3),
+                    self.timestamps[3] + pd.Timedelta(seconds=3),
+                    self.timestamps[4] + pd.Timedelta(seconds=3),
+                ],
+                "pressure": [1e-11, 1e-11, 4e-9, 1e-11, 1e-11],
+                "phase": ["baseline", "baseline", "spray", "spray", "spray"],
+            }
+        )
+
+        self.assertFalse(_isolated_pressure_spike_mask(data).any())
 
 
 if __name__ == "__main__":

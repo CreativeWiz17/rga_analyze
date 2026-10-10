@@ -31,7 +31,8 @@ The run summary lists any CSV that did not contain usable chronological AMU-4 sa
 ## How to read the plots
 
 - Each plot shows raw helium pressure. There is no rolling median or smoothing.
-- If a few pressure values are more than 50 times the 99th-percentile absolute pressure, the graph switches to a symmetric-log y-axis so extreme peaks and ordinary readings remain visible together. This changes only the display scale; it does not remove or alter samples.
+- Pressure graphs always use a linear y-axis; scientific notation is used for pressure tick labels when appropriate.
+- A run of one or two pressure samples is omitted from plots and fits when each reading is more than 10 times both bounding readings, the bounding readings are within a factor of 10 of each other, and the whole run is in the same phase with no more than two seconds between adjacent samples. The plot title reports how many samples were omitted. The processed-data CSV and source files retain all original samples.
 - Time-axis tick spacing adapts to the plotted duration to keep long-run labels readable.
 - CSVs in a nested folder whose name contains `Baseline` are shown as the null baseline. If an identical CSV is also copied directly into the location folder, that duplicate is counted as baseline only; the first remaining CSV marks spray start.
 - Baseline samples are gray and spray samples are blue. Both use their actual sample timestamps; the baseline-colored trace meets the first spray sample at zero, where the blue spray trace begins.
