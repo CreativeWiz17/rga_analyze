@@ -153,6 +153,9 @@ class LinearPhaseTrendTests(unittest.TestCase):
 
                 self.assertTrue(output.is_file())
                 self.assertEqual(set(trend_lines), {"Baseline trend", "Spray trend"})
+                for line in trend_lines.values():
+                    self.assertAlmostEqual(line.get_xdata()[0], -9 * 60)
+                    self.assertAlmostEqual(line.get_xdata()[-1], 2 * 60)
                 baseline_slope = np.polyfit(
                     trend_lines["Baseline trend"].get_xdata() / 60,
                     trend_lines["Baseline trend"].get_ydata(),
@@ -168,6 +171,122 @@ class LinearPhaseTrendTests(unittest.TestCase):
                 summary = "\n".join(text.get_text() for text in axes.texts)
                 self.assertIn("Baseline: slope = 1.000e-11 Torr/min (n=3", summary)
                 self.assertIn("Spray: slope = 2.000e-11 Torr/min (n=3", summary)
+            finally:
+                plt.close("all")
+
+    def test_linear_fit_without_baseline_spans_the_full_graph(self) -> None:
+        timestamps = pd.date_range("2026-10-08 15:00:00", periods=3, freq="min")
+        data = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "pressure": [1.0e-10, 2.0e-10, 3.0e-10],
+                "pressure_unit": ["Torr"] * 3,
+                "phase": ["spray"] * 3,
+                "spray_start": [timestamps[0]] * 3,
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "fit.png"
+            try:
+                with patch("rga_analyze.pipeline.plt.close"):
+                    plot_location(data, "test_location", output, fit_degree=1)
+                axes = plt.gcf().axes[0]
+                trend_lines = [
+                    line for line in axes.lines if line.get_label() == "Spray trend"
+                ]
+
+                self.assertEqual(len(trend_lines), 1)
+                self.assertAlmostEqual(trend_lines[0].get_xdata()[0], 0)
+                self.assertAlmostEqual(trend_lines[0].get_xdata()[-1], 2 * 60)
+                self.assertEqual(axes.get_legend().get_texts()[0].get_text(), "Spray trend")
+            finally:
+                plt.close("all")
+
+    def test_quadratic_fits_cover_full_graph_with_distinct_phase_colors(self) -> None:
+        spray_start = pd.Timestamp("2026-10-08 15:00:00")
+        timestamps = [
+            spray_start - pd.Timedelta(minutes=3),
+            spray_start - pd.Timedelta(minutes=2),
+            spray_start - pd.Timedelta(minutes=1),
+            spray_start,
+            spray_start + pd.Timedelta(minutes=1),
+            spray_start + pd.Timedelta(minutes=2),
+        ]
+        data = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "pressure": [
+                    1.0e-10,
+                    2.0e-10,
+                    5.0e-10,
+                    3.0e-10,
+                    4.0e-10,
+                    7.0e-10,
+                ],
+                "pressure_unit": ["Torr"] * 6,
+                "phase": ["baseline"] * 3 + ["spray"] * 3,
+                "spray_start": [spray_start] * 6,
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "quadratic.png"
+            try:
+                with patch("rga_analyze.pipeline.plt.close"):
+                    plot_location(data, "test_location", output, fit_degree=2)
+                axes = plt.gcf().axes[0]
+                trend_lines = {
+                    line.get_label(): line
+                    for line in axes.lines
+                    if line.get_label() in {"Baseline trend", "Spray trend"}
+                }
+
+                self.assertTrue(output.is_file())
+                self.assertEqual(set(trend_lines), {"Baseline trend", "Spray trend"})
+                self.assertNotEqual(
+                    trend_lines["Baseline trend"].get_color(),
+                    trend_lines["Spray trend"].get_color(),
+                )
+                for line in trend_lines.values():
+                    self.assertAlmostEqual(line.get_xdata()[0], -3 * 60)
+                    self.assertAlmostEqual(line.get_xdata()[-1], 2 * 60)
+                summary = "\n".join(text.get_text() for text in axes.texts)
+                self.assertIn("Baseline: P(t) =", summary)
+                self.assertIn("Spray: P(t) =", summary)
+                self.assertEqual(
+                    {text.get_text() for text in axes.get_legend().get_texts()},
+                    {"Baseline trend", "Spray trend"},
+                )
+            finally:
+                plt.close("all")
+
+    def test_quadratic_fit_without_baseline_spans_the_full_graph(self) -> None:
+        timestamps = pd.date_range("2026-10-08 15:00:00", periods=3, freq="min")
+        data = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "pressure": [1.0e-10, 2.0e-10, 5.0e-10],
+                "pressure_unit": ["Torr"] * 3,
+                "phase": ["spray"] * 3,
+                "spray_start": [timestamps[0]] * 3,
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "quadratic.png"
+            try:
+                with patch("rga_analyze.pipeline.plt.close"):
+                    plot_location(data, "test_location", output, fit_degree=2)
+                axes = plt.gcf().axes[0]
+                trend_lines = [
+                    line for line in axes.lines if line.get_label() == "Spray trend"
+                ]
+
+                self.assertEqual(len(trend_lines), 1)
+                self.assertAlmostEqual(trend_lines[0].get_xdata()[0], 0)
+                self.assertAlmostEqual(trend_lines[0].get_xdata()[-1], 2 * 60)
+                self.assertIn("Spray: P(t) =", "\n".join(text.get_text() for text in axes.texts))
             finally:
                 plt.close("all")
 
