@@ -175,7 +175,80 @@ def plot_location(
         ax.axvline(left, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
         ax.axvline(right, color="#c62828", linewidth=0.8, alpha=0.8, linestyle="--")
 
-    if fit_degree is not None:
+    fit_name = "linear" if fit_degree == 1 else "quadratic"
+    if fit_degree == 1 and has_baseline:
+        fit_summaries = []
+        fit_colors = {"baseline": "#6a51a3", "spray": "#e67e22"}
+        unit_label = units[0] if len(units) == 1 else "pressure"
+        for phase in ("baseline", "spray"):
+            fit_data = data.loc[
+                (phases == phase) & data["pressure"].notna()
+            ]
+            if len(fit_data) < 2:
+                fit_summaries.append(f"{phase.title()}: not enough samples for a fit")
+                continue
+
+            phase_start = fit_data["timestamp"].min()
+            fit_minutes_data = (
+                fit_data["timestamp"] - phase_start
+            ).dt.total_seconds() / 60
+            fit = np.polynomial.Polynomial.fit(
+                fit_minutes_data.to_numpy(dtype=float),
+                fit_data["pressure"].to_numpy(dtype=float),
+                1,
+            ).convert()
+            phase_start_minutes = (phase_start - start).total_seconds() / 60
+            fit_minutes = np.linspace(
+                float(phase_start_minutes),
+                float(
+                    (fit_data["timestamp"].max() - start).total_seconds() / 60
+                ),
+                500,
+            )
+            ax.plot(
+                fit_minutes * 60,
+                fit.coef[0] + fit.coef[1] * (fit_minutes - phase_start_minutes),
+                color=fit_colors[phase],
+                linewidth=2.2,
+                zorder=4,
+                label=f"{phase.title()} trend",
+            )
+            pressures = fit_data["pressure"].to_numpy(dtype=float)
+            residual_sum_squares = float(
+                np.sum((pressures - fit(fit_minutes_data)) ** 2)
+            )
+            total_sum_squares = float(np.sum((pressures - pressures.mean()) ** 2))
+            r_squared = (
+                1 - residual_sum_squares / total_sum_squares
+                if total_sum_squares > 0
+                else None
+            )
+            r_squared_label = (
+                f", R² = {r_squared:.3f}" if r_squared is not None else ""
+            )
+            fit_summaries.append(
+                f"{phase.title()}: slope = {fit.coef[1]:.3e} "
+                f"{unit_label}/min (n={len(fit_data)}{r_squared_label})"
+            )
+
+        ax.legend(loc="best", fontsize=9)
+        ax.text(
+            0.02,
+            0.98,
+            "\n".join(fit_summaries),
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontsize=9,
+            bbox={
+                "boxstyle": "round,pad=0.4",
+                "facecolor": "white",
+                "edgecolor": "#9aa0a6",
+                "alpha": 0.9,
+            },
+            zorder=6,
+        )
+    elif fit_degree is not None:
         fit_data = (
             data.loc[(data["phase"] == "spray") & data["pressure"].notna()]
             if "phase" in data
@@ -194,7 +267,6 @@ def plot_location(
             float(fit_minutes_data.max()),
             500,
         )
-        fit_name = "linear" if fit_degree == 1 else "quadratic"
         ax.plot(
             fit_minutes * 60,
             fit(fit_minutes),

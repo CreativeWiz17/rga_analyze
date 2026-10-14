@@ -1,13 +1,16 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from rga_analyze.pipeline import (
     _isolated_pressure_spike_mask,
     _read_helium_file,
+    plot_location,
     read_helium_file,
 )
 
@@ -106,6 +109,67 @@ class IsolatedPressureSpikeTests(unittest.TestCase):
         )
 
         self.assertFalse(_isolated_pressure_spike_mask(data).any())
+
+
+class LinearPhaseTrendTests(unittest.TestCase):
+    def test_plots_and_reports_separate_baseline_and_spray_slopes(self) -> None:
+        spray_start = pd.Timestamp("2026-10-08 15:00:00")
+        timestamps = [
+            spray_start - pd.Timedelta(minutes=9),
+            spray_start - pd.Timedelta(minutes=8),
+            spray_start - pd.Timedelta(minutes=7),
+            spray_start,
+            spray_start + pd.Timedelta(minutes=1),
+            spray_start + pd.Timedelta(minutes=2),
+        ]
+        data = pd.DataFrame(
+            {
+                "timestamp": timestamps,
+                "pressure": [
+                    1.0e-10,
+                    1.1e-10,
+                    1.2e-10,
+                    2.0e-10,
+                    2.2e-10,
+                    2.4e-10,
+                ],
+                "pressure_unit": ["Torr"] * 6,
+                "phase": ["baseline"] * 3 + ["spray"] * 3,
+                "spray_start": [spray_start] * 6,
+            }
+        )
+
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            output = Path(temporary_directory) / "fit.png"
+            try:
+                with patch("rga_analyze.pipeline.plt.close"):
+                    plot_location(data, "test_location", output, fit_degree=1)
+                axes = plt.gcf().axes[0]
+                trend_lines = {
+                    line.get_label(): line
+                    for line in axes.lines
+                    if line.get_label() in {"Baseline trend", "Spray trend"}
+                }
+
+                self.assertTrue(output.is_file())
+                self.assertEqual(set(trend_lines), {"Baseline trend", "Spray trend"})
+                baseline_slope = np.polyfit(
+                    trend_lines["Baseline trend"].get_xdata() / 60,
+                    trend_lines["Baseline trend"].get_ydata(),
+                    1,
+                )[0]
+                spray_slope = np.polyfit(
+                    trend_lines["Spray trend"].get_xdata() / 60,
+                    trend_lines["Spray trend"].get_ydata(),
+                    1,
+                )[0]
+                self.assertAlmostEqual(baseline_slope, 1.0e-11, places=22)
+                self.assertAlmostEqual(spray_slope, 2.0e-11, places=22)
+                summary = "\n".join(text.get_text() for text in axes.texts)
+                self.assertIn("Baseline: slope = 1.000e-11 Torr/min (n=3", summary)
+                self.assertIn("Spray: slope = 2.000e-11 Torr/min (n=3", summary)
+            finally:
+                plt.close("all")
 
 
 if __name__ == "__main__":

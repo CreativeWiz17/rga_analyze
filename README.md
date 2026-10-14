@@ -22,7 +22,7 @@ The terminal needs to be open in the project folder (the one containing `README.
 
 - Results are grouped under `analysis_outputs/<month.day>/`, based on the input folder name.
 - `plots/helium_by_location/`: raw, unfitted time-series graphs, one per location.
-- `plots/helium_by_location_fits/linear/`: raw readings with a straight-line fit to the spray phase, its equation, and R².
+- `plots/helium_by_location_fits/linear/`: raw readings with straight-line fits to baseline and spray when baseline data is available, with each phase's slope, sample count, and R². The spray fit covers the full spray phase; without baseline data, it shows only the spray fit.
 - `plots/helium_by_location_fits/quadratic/`: raw readings with a second-degree (quadratic) fit to the spray phase, its equation, and R².
 - `processed_data/amu4_by_location/`: the AMU-4 samples used for each graph, with timestamps, phase, source-file names, spray start, and elapsed time.
 
@@ -39,6 +39,6 @@ The run summary lists any CSV that did not contain usable chronological AMU-4 sa
 - The x-axis is time relative to spray start (`min:s`): baseline readings are negative and the first spray sample is at zero. No baseline subtraction is applied to the pressure values.
 - The red point marks the highest measured sample in the spray phase; it is a visual reference, not an automatic leak verdict.
 - Gaps longer than two seconds, including the baseline-to-spray transition, are left unconnected and marked in red.
-- Fit graphs add an orange curve and show its equation (with time from spray start in minutes) and R². The linear fit summarizes the average direction; the quadratic fit allows broad curvature. Both use only the spray phase, so neither is designed to isolate a short-lived peak. R² describes how much of the variation in the recorded pressures is captured by that fit; it does not establish a leak or its cause.
+- Linear fit graphs show separate baseline and spray lines when baseline data is available. Each slope is pressure change per minute, fitted only to that phase's readings; the spray fit covers the full spray phase. The sample count and R² are shown for each line. Quadratic fit graphs add an orange curve and show its equation (with time from spray start in minutes) and R²; the quadratic fit uses only the spray phase. Full-phase fits summarize the average direction and can hide short-lived peaks. R² describes how much of the variation in the recorded pressures is captured by a fit; it does not establish a leak or its cause.
 
 These fits are exploratory visual comparisons, not a leak-rate calculation or a leak verdict. Use the raw plots to identify a time range before interpreting a short rise or peak; a fit over the full spray phase can hide local behavior. Source files are never changed.
