@@ -148,14 +148,30 @@ class LinearPhaseTrendTests(unittest.TestCase):
                 trend_lines = {
                     line.get_label(): line
                     for line in axes.lines
-                    if line.get_label() in {"Baseline trend", "Spray trend"}
+                    if line.get_label()
+                    in {"Baseline trend", "Baseline projection", "Spray trend"}
                 }
 
                 self.assertTrue(output.is_file())
-                self.assertEqual(set(trend_lines), {"Baseline trend", "Spray trend"})
-                for line in trend_lines.values():
-                    self.assertAlmostEqual(line.get_xdata()[0], -9 * 60)
-                    self.assertAlmostEqual(line.get_xdata()[-1], 2 * 60)
+                self.assertEqual(
+                    set(trend_lines),
+                    {"Baseline trend", "Baseline projection", "Spray trend"},
+                )
+                self.assertAlmostEqual(trend_lines["Baseline trend"].get_xdata()[0], -9 * 60)
+                self.assertAlmostEqual(trend_lines["Baseline trend"].get_xdata()[-1], -7 * 60)
+                self.assertAlmostEqual(
+                    trend_lines["Baseline projection"].get_xdata()[0], -7 * 60
+                )
+                self.assertAlmostEqual(
+                    trend_lines["Baseline projection"].get_xdata()[-1], 2 * 60
+                )
+                self.assertEqual(
+                    trend_lines["Baseline projection"].get_linestyle(), "--"
+                )
+                self.assertAlmostEqual(trend_lines["Spray trend"].get_xdata()[0], 0)
+                self.assertAlmostEqual(
+                    trend_lines["Spray trend"].get_xdata()[-1], 2 * 60
+                )
                 baseline_slope = np.polyfit(
                     trend_lines["Baseline trend"].get_xdata() / 60,
                     trend_lines["Baseline trend"].get_ydata(),
@@ -171,6 +187,8 @@ class LinearPhaseTrendTests(unittest.TestCase):
                 summary = "\n".join(text.get_text() for text in axes.texts)
                 self.assertIn("Baseline: slope = 1.000e-11 Torr/min (n=3", summary)
                 self.assertIn("Spray: slope = 2.000e-11 Torr/min (n=3", summary)
+                self.assertIn("At spray start (spray − baseline): level Δ =", summary)
+                self.assertIn("slope Δ = 1.000e-11 Torr/min", summary)
             finally:
                 plt.close("all")
 
@@ -203,7 +221,7 @@ class LinearPhaseTrendTests(unittest.TestCase):
             finally:
                 plt.close("all")
 
-    def test_quadratic_fits_cover_full_graph_with_distinct_phase_colors(self) -> None:
+    def test_quadratic_fits_show_phase_ranges_and_baseline_projection(self) -> None:
         spray_start = pd.Timestamp("2026-10-08 15:00:00")
         timestamps = [
             spray_start - pd.Timedelta(minutes=3),
@@ -239,25 +257,38 @@ class LinearPhaseTrendTests(unittest.TestCase):
                 trend_lines = {
                     line.get_label(): line
                     for line in axes.lines
-                    if line.get_label() in {"Baseline trend", "Spray trend"}
+                    if line.get_label()
+                    in {"Baseline trend", "Baseline projection", "Spray trend"}
                 }
 
                 self.assertTrue(output.is_file())
-                self.assertEqual(set(trend_lines), {"Baseline trend", "Spray trend"})
+                self.assertEqual(
+                    set(trend_lines),
+                    {"Baseline trend", "Baseline projection", "Spray trend"},
+                )
                 self.assertNotEqual(
                     trend_lines["Baseline trend"].get_color(),
                     trend_lines["Spray trend"].get_color(),
                 )
-                for line in trend_lines.values():
-                    self.assertAlmostEqual(line.get_xdata()[0], -3 * 60)
-                    self.assertAlmostEqual(line.get_xdata()[-1], 2 * 60)
+                self.assertAlmostEqual(trend_lines["Baseline trend"].get_xdata()[0], -3 * 60)
+                self.assertAlmostEqual(trend_lines["Baseline trend"].get_xdata()[-1], -1 * 60)
+                self.assertAlmostEqual(
+                    trend_lines["Baseline projection"].get_xdata()[0], -1 * 60
+                )
+                self.assertAlmostEqual(
+                    trend_lines["Baseline projection"].get_xdata()[-1], 2 * 60
+                )
+                self.assertAlmostEqual(trend_lines["Spray trend"].get_xdata()[0], 0)
+                self.assertAlmostEqual(
+                    trend_lines["Spray trend"].get_xdata()[-1], 2 * 60
+                )
                 summary = "\n".join(text.get_text() for text in axes.texts)
                 self.assertIn("Baseline: P(t) =", summary)
                 self.assertIn("Spray: P(t) =", summary)
-                self.assertEqual(
-                    {text.get_text() for text in axes.get_legend().get_texts()},
-                    {"Baseline trend", "Spray trend"},
-                )
+                self.assertIn("At spray start (spray − baseline): level Δ =", summary)
+                self.assertIn("slope Δ =", summary)
+                legend_labels = {text.get_text() for text in axes.get_legend().get_texts()}
+                self.assertTrue({"Baseline trend", "Baseline projection", "Spray trend"}.issubset(legend_labels))
             finally:
                 plt.close("all")
 

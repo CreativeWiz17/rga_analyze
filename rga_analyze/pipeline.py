@@ -180,11 +180,8 @@ def plot_location(
         fit_summaries = []
         fit_colors = {"baseline": "#6a51a3", "spray": "#e67e22"}
         unit_label = units[0] if len(units) == 1 else "pressure"
-        fit_minutes = np.linspace(
-            min(float(seconds.min()), 0) / 60,
-            max(float(seconds.max()), 1) / 60,
-            500,
-        )
+        graph_end_minutes = max(float(seconds.max()), 1) / 60
+        fitted_models: dict[str, tuple[np.polynomial.Polynomial, np.ndarray]] = {}
         for phase in ("baseline", "spray") if has_baseline else ("spray",):
             fit_data = data.loc[
                 (phases == phase) & data["pressure"].notna()
@@ -208,6 +205,10 @@ def plot_location(
                 fit_degree,
             )
             coefficients = fit.convert().coef
+            fitted_models[phase] = (fit, coefficients)
+            fit_start = float(fit_minutes_data.min())
+            fit_end = float(fit_minutes_data.max())
+            fit_minutes = np.linspace(fit_start, fit_end, 500)
             ax.plot(
                 fit_minutes * 60,
                 fit(fit_minutes),
@@ -216,6 +217,21 @@ def plot_location(
                 zorder=4,
                 label=f"{phase.title()} trend",
             )
+            if phase == "baseline" and fit_end < graph_end_minutes:
+                projection_minutes = np.linspace(
+                    fit_end,
+                    graph_end_minutes,
+                    500,
+                )
+                ax.plot(
+                    projection_minutes * 60,
+                    fit(projection_minutes),
+                    color=fit_colors[phase],
+                    linewidth=2.2,
+                    linestyle="--",
+                    zorder=4,
+                    label="Baseline projection",
+                )
             pressures = fit_data["pressure"].to_numpy(dtype=float)
             residual_sum_squares = float(
                 np.sum((pressures - fit(fit_minutes_data)) ** 2)
@@ -247,6 +263,41 @@ def plot_location(
                     f"R² = {r_squared:.3f}" if r_squared is not None
                     else f"{phase.title()}: {equation}\nR² = undefined"
                 )
+
+        if has_baseline and {"baseline", "spray"}.issubset(fitted_models):
+            baseline_fit, baseline_coefficients = fitted_models["baseline"]
+            spray_fit, spray_coefficients = fitted_models["spray"]
+            baseline_at_start = float(baseline_fit(0))
+            spray_at_start = float(spray_fit(0))
+            baseline_slope_at_start = float(baseline_coefficients[1])
+            spray_slope_at_start = float(spray_coefficients[1])
+            level_difference = spray_at_start - baseline_at_start
+            slope_difference = spray_slope_at_start - baseline_slope_at_start
+
+            ax.axvline(0, color="#202124", linewidth=0.9, linestyle=":", zorder=3)
+            ax.scatter(
+                [0, 0],
+                [baseline_at_start, spray_at_start],
+                color=[fit_colors["baseline"], fit_colors["spray"]],
+                edgecolor="white",
+                linewidth=0.8,
+                s=48,
+                zorder=5,
+            )
+            if not np.isclose(level_difference, 0):
+                ax.annotate(
+                    "",
+                    xy=(0, spray_at_start),
+                    xytext=(0, baseline_at_start),
+                    arrowprops={"arrowstyle": "<->", "color": "#202124", "lw": 1.2},
+                    zorder=5,
+                )
+
+            fit_summaries.append(
+                f"At spray start (spray − baseline): level Δ = "
+                f"{level_difference:.3e} {unit_label}; slope Δ = "
+                f"{slope_difference:.3e} {unit_label}/min"
+            )
 
         ax.legend(loc="best", fontsize=9)
         ax.text(
